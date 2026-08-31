@@ -1,0 +1,32 @@
+[
+  {
+    "id": "emp-1",
+    "name": "Sarah Connor",
+    "email": "sarah.c@company.internal",
+    "department": "Engineering"
+  },
+  {
+    "id": "emp-2",
+    "name": "David Miller",
+    "email": "david.m@company.internal",
+    "department": "Product Design"
+  },
+  {
+    "id": "emp-3",
+    "name": "Elena Rostova",
+    "email": "elena.r@company.internal",
+    "department": "Marketing"
+  },
+  {
+    "id": "emp-4",
+    "name": "James Holden",
+    "email": "james.h@company.internal",
+    "department": "Operations"
+  },
+  {
+    "id": "emp-5",
+    "name": "Naomi Nagata",
+    "email": "naomi.n@company.internal",
+    "department": "Engineering"
+  }
+]

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "booking-1",
+    "roomId": "room-101",
+    "employeeId": "emp-1",
+    "title": "Weekly Engineering Sync",
+    "description": "Team updates and sprint planning.",
+    "startTime": "2026-08-31T10:00:00.000Z",
+    "endTime": "2026-08-31T11:30:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-25T09:00:00.000Z"
+  },
+  {
+    "id": "booking-2",
+    "roomId": "room-102",
+    "employeeId": "emp-3",
+    "title": "Q3 Campaign Review",
+    "description": "Reviewing ad creatives for next month.",
+    "startTime": "2026-09-01T14:00:00.000Z",
+    "endTime": "2026-09-01T15:00:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-28T14:30:00.000Z"
+  },
+  {
+    "id": "booking-3",
+    "roomId": "room-201",
+    "employeeId": "emp-2",
+    "title": "Design System Workshop",
+    "description": "Finalizing the new UI component library.",
+    "startTime": "2026-09-02T09:00:00.000Z",
+    "endTime": "2026-09-02T12:00:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-29T11:15:00.000Z"
+  },
+  {
+    "id": "booking-4",
+    "roomId": "room-202",
+    "employeeId": "emp-4",
+    "title": "Vendor Call - Logistics",
+    "description": "Private call with new shipping partner.",
+    "startTime": "2026-09-03T13:00:00.000Z",
+    "endTime": "2026-09-03T14:00:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-30T16:45:00.000Z"
+  },
+  {
+    "id": "booking-5",
+    "roomId": "room-301",
+    "employeeId": "emp-5",
+    "title": "All-Hands Prep",
+    "description": "Testing AV equipment for Friday presentation.",
+    "startTime": "2026-09-04T16:00:00.000Z",
+    "endTime": "2026-09-04T17:00:00.000Z",
+    "status": "confirmed",
+    "createdAt": "2026-08-31T08:20:00.000Z"
+  }
+]
