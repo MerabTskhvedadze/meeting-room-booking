@@ -43,10 +43,13 @@ export function RoomsPage() {
     }
   }, [loadAttempt])
 
-  const search = (searchParams.get('search') ?? '').trim().toLowerCase()
-  const floor = Number(searchParams.get('floor'))
-  const minimumCapacity = Number(searchParams.get('capacity'))
+  const searchValue = searchParams.get('search') ?? ''
+  const floorValue = searchParams.get('floor') ?? ''
+  const capacityValue = searchParams.get('capacity') ?? ''
   const amenity = searchParams.get('amenity') ?? ''
+  const search = searchValue.trim().toLowerCase()
+  const floor = Number(floorValue)
+  const minimumCapacity = Number(capacityValue)
 
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch =
@@ -64,6 +67,22 @@ export function RoomsPage() {
     setIsLoading(true)
     setError('')
     setLoadAttempt((attempt) => attempt + 1)
+  }
+
+  function updateFilter(name: string, value: string) {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (value) {
+      nextParams.set(name, value)
+    } else {
+      nextParams.delete(name)
+    }
+
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  function clearFilters() {
+    setSearchParams({}, { replace: true })
   }
 
   return (
@@ -84,7 +103,15 @@ export function RoomsPage() {
         ) : null}
       </div>
 
-      <RoomFilters rooms={rooms} />
+      <RoomFilters
+        amenity={amenity}
+        capacity={capacityValue}
+        floor={floorValue}
+        onClear={clearFilters}
+        onFilterChange={updateFilter}
+        rooms={rooms}
+        search={searchValue}
+      />
 
       {isLoading ? (
         <RoomsLoading />
@@ -102,7 +129,7 @@ export function RoomsPage() {
           className="mt-6"
           description="Try changing your search or clearing the selected filters."
           icon={<Building2 aria-hidden="true" size={22} />}
-          onAction={() => setSearchParams({}, { replace: true })}
+          onAction={clearFilters}
           title="No rooms match your filters"
         />
       )}

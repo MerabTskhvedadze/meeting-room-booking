@@ -1,5 +1,4 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,36 +13,35 @@ import {
 import type { Room } from '@/types/room'
 
 interface RoomFiltersProps {
+  amenity: string
+  capacity: string
+  floor: string
+  onClear: () => void
+  onFilterChange: (
+    name: 'search' | 'floor' | 'capacity' | 'amenity',
+    value: string,
+  ) => void
   rooms: Room[]
+  search: string
 }
 
 const ALL_OPTIONS = 'all-options'
 
-export function RoomFilters({ rooms }: RoomFiltersProps) {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const search = searchParams.get('search') ?? ''
-  const floor = searchParams.get('floor') ?? ''
-  const capacity = searchParams.get('capacity') ?? ''
-  const amenity = searchParams.get('amenity') ?? ''
-
+export function RoomFilters({
+  amenity,
+  capacity,
+  floor,
+  onClear,
+  onFilterChange,
+  rooms,
+  search,
+}: RoomFiltersProps) {
   const floors = [...new Set(rooms.map((room) => room.floor))].sort((a, b) => a - b)
   const capacities = [...new Set(rooms.map((room) => room.capacity))].sort(
     (a, b) => a - b,
   )
   const amenities = [...new Set(rooms.flatMap((room) => room.amenities))].sort()
   const hasFilters = Boolean(search || floor || capacity || amenity)
-
-  function updateFilter(name: string, value: string) {
-    const nextParams = new URLSearchParams(searchParams)
-
-    if (value && value !== ALL_OPTIONS) {
-      nextParams.set(name, value)
-    } else {
-      nextParams.delete(name)
-    }
-
-    setSearchParams(nextParams, { replace: true })
-  }
 
   return (
     <Card aria-label="Room filters" className="mt-8" role="region">
@@ -56,7 +54,7 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
         {hasFilters ? (
           <CardAction>
             <Button
-              onClick={() => setSearchParams({}, { replace: true })}
+              onClick={onClear}
               size="sm"
               type="button"
               variant="ghost"
@@ -78,7 +76,7 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
           />
           <Input
             className="pl-9"
-            onChange={(event) => updateFilter('search', event.target.value)}
+            onChange={(event) => onFilterChange('search', event.target.value)}
             placeholder="Search by room or amenity"
             type="search"
             value={search}
@@ -86,7 +84,9 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
         </label>
 
         <Select
-          onValueChange={(value) => updateFilter('floor', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('floor', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={floor || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Floor" className="w-full">
@@ -105,7 +105,9 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
         </Select>
 
         <Select
-          onValueChange={(value) => updateFilter('capacity', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('capacity', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={capacity || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Minimum capacity" className="w-full">
@@ -126,7 +128,9 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
         </Select>
 
         <Select
-          onValueChange={(value) => updateFilter('amenity', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('amenity', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={amenity || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Amenity" className="w-full">

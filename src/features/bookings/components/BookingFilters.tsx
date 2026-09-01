@@ -1,5 +1,4 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,30 +13,30 @@ import {
 import type { Room } from '@/types/room'
 
 interface BookingFiltersProps {
+  onClear: () => void
+  onFilterChange: (
+    name: 'search' | 'room' | 'status' | 'period',
+    value: string,
+  ) => void
+  period: string
+  room: string
   rooms: Room[]
+  search: string
+  status: string
 }
 
 const ALL_OPTIONS = 'all-options'
 
-export function BookingFilters({ rooms }: BookingFiltersProps) {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const search = searchParams.get('search') ?? ''
-  const room = searchParams.get('room') ?? ''
-  const status = searchParams.get('status') ?? ''
-  const period = searchParams.get('period') ?? ''
+export function BookingFilters({
+  onClear,
+  onFilterChange,
+  period,
+  room,
+  rooms,
+  search,
+  status,
+}: BookingFiltersProps) {
   const hasFilters = Boolean(search || room || status || period)
-
-  function updateFilter(name: string, value: string) {
-    const nextParams = new URLSearchParams(searchParams)
-
-    if (value && value !== ALL_OPTIONS) {
-      nextParams.set(name, value)
-    } else {
-      nextParams.delete(name)
-    }
-
-    setSearchParams(nextParams, { replace: true })
-  }
 
   return (
     <Card aria-label="Booking filters" className="mt-8" role="region">
@@ -50,7 +49,7 @@ export function BookingFilters({ rooms }: BookingFiltersProps) {
         {hasFilters ? (
           <CardAction>
             <Button
-              onClick={() => setSearchParams({}, { replace: true })}
+              onClick={onClear}
               size="sm"
               type="button"
               variant="ghost"
@@ -72,7 +71,7 @@ export function BookingFilters({ rooms }: BookingFiltersProps) {
           />
           <Input
             className="pl-9"
-            onChange={(event) => updateFilter('search', event.target.value)}
+            onChange={(event) => onFilterChange('search', event.target.value)}
             placeholder="Search meetings, rooms, or organizers"
             type="search"
             value={search}
@@ -80,7 +79,9 @@ export function BookingFilters({ rooms }: BookingFiltersProps) {
         </label>
 
         <Select
-          onValueChange={(value) => updateFilter('room', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('room', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={room || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Room" className="w-full">
@@ -103,7 +104,9 @@ export function BookingFilters({ rooms }: BookingFiltersProps) {
         </Select>
 
         <Select
-          onValueChange={(value) => updateFilter('status', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('status', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={status || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Status" className="w-full">
@@ -123,7 +126,9 @@ export function BookingFilters({ rooms }: BookingFiltersProps) {
         </Select>
 
         <Select
-          onValueChange={(value) => updateFilter('period', value ?? '')}
+          onValueChange={(value) =>
+            onFilterChange('period', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
           value={period || ALL_OPTIONS}
         >
           <SelectTrigger aria-label="Time period" className="w-full">

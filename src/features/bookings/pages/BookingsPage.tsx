@@ -53,10 +53,11 @@ export function BookingsPage() {
   }, [loadAttempt])
 
   const now = new Date()
-  const search = (searchParams.get('search') ?? '').trim().toLowerCase()
+  const searchValue = searchParams.get('search') ?? ''
   const selectedRoom = searchParams.get('room') ?? ''
   const selectedStatus = searchParams.get('status') ?? ''
   const selectedPeriod = searchParams.get('period') ?? ''
+  const search = searchValue.trim().toLowerCase()
   const roomById = new Map(rooms.map((room) => [room.id, room]))
   const employeeById = new Map(employees.map((employee) => [employee.id, employee]))
 
@@ -102,6 +103,22 @@ export function BookingsPage() {
     setLoadAttempt((attempt) => attempt + 1)
   }
 
+  function updateFilter(name: string, value: string) {
+    const nextParams = new URLSearchParams(searchParams)
+
+    if (value) {
+      nextParams.set(name, value)
+    } else {
+      nextParams.delete(name)
+    }
+
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  function clearFilters() {
+    setSearchParams({}, { replace: true })
+  }
+
   return (
     <section>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -119,7 +136,15 @@ export function BookingsPage() {
         </Link>
       </div>
 
-      <BookingFilters rooms={rooms} />
+      <BookingFilters
+        onClear={clearFilters}
+        onFilterChange={updateFilter}
+        period={selectedPeriod}
+        room={selectedRoom}
+        rooms={rooms}
+        search={searchValue}
+        status={selectedStatus}
+      />
 
       {!isLoading && !error ? (
         <div className="mt-6 flex items-center justify-between gap-4">
@@ -148,7 +173,7 @@ export function BookingsPage() {
           className="mt-6"
           description="Try changing your search or clearing the selected filters."
           icon={<CalendarX2 aria-hidden="true" size={22} />}
-          onAction={() => setSearchParams({}, { replace: true })}
+          onAction={clearFilters}
           title="No bookings match your filters"
         />
       )}
