@@ -5,7 +5,26 @@ import {
   LayoutDashboard,
   Plus,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+
+import { buttonVariants } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 const navigation = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true },
@@ -14,89 +33,109 @@ const navigation = [
   { label: 'Bookings', to: '/bookings', icon: CalendarDays },
 ]
 
-export function AppLayout() {
+function isRouteActive(pathname: string, to: string, end?: boolean) {
+  if (end) {
+    return pathname === to
+  }
+
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
+
+function AppSidebar() {
+  const { pathname } = useLocation()
+  const { setOpenMobile } = useSidebar()
+
+  function closeMobileSidebar() {
+    setOpenMobile(false)
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white lg:flex lg:flex-col">
-        <div className="flex h-20 items-center gap-3 border-b border-slate-200 px-6">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
-            <CalendarDays aria-hidden="true" size={20} />
-          </div>
-          <div>
-            <p className="font-semibold tracking-tight">Booking</p>
-          </div>
-        </div>
-
-        <nav aria-label="Primary navigation" className="flex-1 space-y-1 p-4">
-          {navigation.map(({ end, icon: Icon, label, to }) => (
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950'
-                }`
-              }
-              end={end}
-              key={to}
-              to={to}
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname === '/'}
+              render={<NavLink onClick={closeMobileSidebar} to="/" />}
+              size="lg"
+              tooltip="Booking"
             >
-              <Icon aria-hidden="true" size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
-
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
-            <NavLink className="flex items-center gap-2 font-semibold lg:hidden" to="/">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <CalendarDays aria-hidden="true" size={18} />
+              <span className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <CalendarDays aria-hidden="true" />
               </span>
-            </NavLink>
+              <span className="grid flex-1 text-left leading-tight">
+                <span className="truncate font-heading font-semibold">Booking</span>
+                <span className="truncate text-xs text-sidebar-foreground/65">Meeting rooms</span>
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-            <p className="hidden text-sm text-slate-500 lg:block">
-              Internal meeting room booking
-            </p>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map(({ end, icon: Icon, label, to }) => (
+                <SidebarMenuItem key={to}>
+                  <SidebarMenuButton
+                    isActive={isRouteActive(pathname, to, end)}
+                    render={<NavLink end={end} onClick={closeMobileSidebar} to={to} />}
+                    tooltip={label}
+                  >
+                    <Icon aria-hidden="true" />
+                    <span>{label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  )
+}
 
-            <NavLink
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
-              to="/bookings/new"
-            >
-              <Plus aria-hidden="true" size={17} />
+function ShellContent() {
+  const { pathname } = useLocation()
+  const currentPage =
+    navigation.find(({ end, to }) => isRouteActive(pathname, to, end))?.label ?? 'Booking'
+
+  return (
+    <>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+          <div className="flex w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <SidebarTrigger />
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{currentPage}</p>
+            </div>
+
+            <Link className={buttonVariants()} to="/bookings/new">
+              <Plus aria-hidden="true" />
               <span className="hidden sm:inline">New booking</span>
               <span className="sm:hidden">Book</span>
-            </NavLink>
+            </Link>
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6 lg:px-8 lg:py-10">
+        <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
           <Outlet />
-        </main>
+        </div>
+      </SidebarInset>
+    </>
+  )
+}
 
-        <nav
-          aria-label="Mobile navigation"
-          className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-slate-200 bg-white px-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
-        >
-          {navigation.map(({ end, icon: Icon, label, to }) => (
-            <NavLink
-              className={({ isActive }) =>
-                `flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-medium ${
-                  isActive ? 'text-indigo-700' : 'text-slate-500'
-                }`
-              }
-              end={end}
-              key={to}
-              to={to}
-            >
-              <Icon aria-hidden="true" size={19} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-      </div>
-    </div>
+export function AppLayout() {
+  return (
+    <TooltipProvider>
+      <SidebarProvider>
+        <ShellContent />
+      </SidebarProvider>
+    </TooltipProvider>
   )
 }
