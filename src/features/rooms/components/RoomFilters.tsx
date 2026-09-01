@@ -1,8 +1,4 @@
-import { Search, SlidersHorizontal, X } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { FilterPanel } from '@/components/FilterPanel'
 import {
   Select,
   SelectContent,
@@ -44,45 +40,16 @@ export function RoomFilters({
   const hasFilters = Boolean(search || floor || capacity || amenity)
 
   return (
-    <Card aria-label="Room filters" className="mt-8" role="region">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SlidersHorizontal aria-hidden="true" size={17} />
-          Find the right room
-        </CardTitle>
-
-        {hasFilters ? (
-          <CardAction>
-            <Button
-              onClick={onClear}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              <X aria-hidden="true" />
-              Clear
-            </Button>
-          </CardAction>
-        ) : null}
-      </CardHeader>
-
-      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <label className="relative md:col-span-2">
-          <span className="sr-only">Search rooms</span>
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-muted-foreground"
-            size={18}
-          />
-          <Input
-            className="pl-9"
-            onChange={(event) => onFilterChange('search', event.target.value)}
-            placeholder="Search by room or amenity"
-            type="search"
-            value={search}
-          />
-        </label>
-
+    <FilterPanel
+      ariaLabel="Room filters"
+      hasFilters={hasFilters}
+      onClear={onClear}
+      onSearchChange={(value) => onFilterChange('search', value)}
+      searchLabel="Search rooms"
+      searchPlaceholder="Search by room or amenity"
+      searchValue={search}
+      title="Find the right room"
+    >
         <Select
           onValueChange={(value) =>
             onFilterChange('floor', value === ALL_OPTIONS ? '' : (value ?? ''))
@@ -147,7 +114,6 @@ export function RoomFilters({
             ))}
           </SelectContent>
         </Select>
-      </CardContent>
-    </Card>
+    </FilterPanel>
   )
 }

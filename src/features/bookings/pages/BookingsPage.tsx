@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
 import { LoadError } from '@/components/LoadError'
+import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { getBookings } from '@/services/bookingService'
@@ -12,6 +13,7 @@ import { getRooms } from '@/services/roomService'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { isBookingPast } from '@/utils/booking'
 import { BookingFilters } from '../components/BookingFilters'
 import { BookingsLoading } from '../components/BookingsLoading'
 import { BookingsList } from '../components/BookingsList'
@@ -77,22 +79,23 @@ export function BookingsPage() {
       const matchesSearch = !search || searchableText.includes(search)
       const matchesRoom = !selectedRoom || booking.roomId === selectedRoom
       const matchesStatus = !selectedStatus || booking.status === selectedStatus
+      const bookingIsPast = isBookingPast(booking, now)
       const matchesPeriod =
         !selectedPeriod ||
-        (selectedPeriod === 'upcoming' && Date.parse(booking.endTime) > now.getTime()) ||
-        (selectedPeriod === 'past' && Date.parse(booking.endTime) <= now.getTime())
+        (selectedPeriod === 'upcoming' && !bookingIsPast) ||
+        (selectedPeriod === 'past' && bookingIsPast)
 
       return matchesSearch && matchesRoom && matchesStatus && matchesPeriod
     })
     .sort((first, second) => {
-      const firstIsUpcoming = Date.parse(first.endTime) > now.getTime()
-      const secondIsUpcoming = Date.parse(second.endTime) > now.getTime()
+      const firstIsCurrentOrUpcoming = !isBookingPast(first, now)
+      const secondIsCurrentOrUpcoming = !isBookingPast(second, now)
 
-      if (firstIsUpcoming !== secondIsUpcoming) {
-        return firstIsUpcoming ? -1 : 1
+      if (firstIsCurrentOrUpcoming !== secondIsCurrentOrUpcoming) {
+        return firstIsCurrentOrUpcoming ? -1 : 1
       }
 
-      return firstIsUpcoming
+      return firstIsCurrentOrUpcoming
         ? Date.parse(first.startTime) - Date.parse(second.startTime)
         : Date.parse(second.startTime) - Date.parse(first.startTime)
     })
@@ -121,20 +124,17 @@ export function BookingsPage() {
 
   return (
     <section>
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-semibold text-primary">Meetings</p>
-          <h1 className="mt-1 font-heading text-3xl font-semibold tracking-tight">Bookings</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Search, review, and manage scheduled meetings.
-          </p>
-        </div>
-
-        <Link className={buttonVariants()} to="/bookings/new">
-          <Plus aria-hidden="true" />
-          New booking
-        </Link>
-      </div>
+      <PageHeader
+        actions={
+          <Link className={buttonVariants()} to="/bookings/new">
+            <Plus aria-hidden="true" />
+            New booking
+          </Link>
+        }
+        description="Search, review, and manage scheduled meetings."
+        eyebrow="Meetings"
+        title="Bookings"
+      />
 
       <BookingFilters
         onClear={clearFilters}

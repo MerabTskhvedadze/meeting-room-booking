@@ -1,8 +1,4 @@
-import { Search, SlidersHorizontal, X } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { FilterPanel } from '@/components/FilterPanel'
 import {
   Select,
   SelectContent,
@@ -39,45 +35,16 @@ export function BookingFilters({
   const hasFilters = Boolean(search || room || status || period)
 
   return (
-    <Card aria-label="Booking filters" className="mt-8" role="region">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <SlidersHorizontal aria-hidden="true" size={17} />
-          Find a booking
-        </CardTitle>
-
-        {hasFilters ? (
-          <CardAction>
-            <Button
-              onClick={onClear}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              <X aria-hidden="true" />
-              Clear
-            </Button>
-          </CardAction>
-        ) : null}
-      </CardHeader>
-
-      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <label className="relative md:col-span-2">
-          <span className="sr-only">Search bookings</span>
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-muted-foreground"
-            size={18}
-          />
-          <Input
-            className="pl-9"
-            onChange={(event) => onFilterChange('search', event.target.value)}
-            placeholder="Search meetings, rooms, or organizers"
-            type="search"
-            value={search}
-          />
-        </label>
-
+    <FilterPanel
+      ariaLabel="Booking filters"
+      hasFilters={hasFilters}
+      onClear={onClear}
+      onSearchChange={(value) => onFilterChange('search', value)}
+      searchLabel="Search bookings"
+      searchPlaceholder="Search meetings, rooms, or organizers"
+      searchValue={search}
+      title="Find a booking"
+    >
         <Select
           onValueChange={(value) =>
             onFilterChange('room', value === ALL_OPTIONS ? '' : (value ?? ''))
@@ -146,7 +113,6 @@ export function BookingFilters({
             <SelectItem value="past">Past</SelectItem>
           </SelectContent>
         </Select>
-      </CardContent>
-    </Card>
+    </FilterPanel>
   )
 }

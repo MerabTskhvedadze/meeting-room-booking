@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { LoadError } from '@/components/LoadError'
+import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
 import { getBookings } from '@/services/bookingService'
 import { getEmployees } from '@/services/employeeService'
@@ -10,6 +11,7 @@ import { getRooms } from '@/services/roomService'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { isBookingActive, isBookingUpcoming } from '@/utils/booking'
 import { fullDateFormatter, isSameLocalDay } from '@/utils/date'
 import { DashboardLoading } from '../components/DashboardLoading'
 import { DashboardMetrics } from '../components/DashboardMetrics'
@@ -60,13 +62,9 @@ export function DashboardPage() {
   const todayBookings = confirmedBookings.filter((booking) =>
     isSameLocalDay(new Date(booking.startTime), now),
   )
-  const activeBookings = confirmedBookings.filter(
-    (booking) =>
-      Date.parse(booking.startTime) <= now.getTime() &&
-      Date.parse(booking.endTime) > now.getTime(),
-  )
+  const activeBookings = confirmedBookings.filter((booking) => isBookingActive(booking, now))
   const upcomingBookings = confirmedBookings
-    .filter((booking) => Date.parse(booking.startTime) > now.getTime())
+    .filter((booking) => isBookingUpcoming(booking, now))
     .sort((first, second) => Date.parse(first.startTime) - Date.parse(second.startTime))
   const upcomingThisWeek = upcomingBookings.filter(
     (booking) => Date.parse(booking.startTime) <= nextWeek.getTime(),
@@ -82,28 +80,23 @@ export function DashboardPage() {
 
   return (
     <section>
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-semibold text-primary">{fullDateFormatter.format(now)}</p>
-          <h1 className="mt-1 font-heading text-3xl font-semibold tracking-tight">
-            {getGreeting(now.getHours())}
-          </h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            See today&apos;s room activity and upcoming meetings at a glance.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Link className={buttonVariants({ variant: 'outline' })} to="/schedule">
-            <CalendarDays aria-hidden="true" />
-            View schedule
-          </Link>
-          <Link className={buttonVariants()} to="/bookings/new">
-            <Plus aria-hidden="true" />
-            New booking
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        actions={
+          <>
+            <Link className={buttonVariants({ variant: 'outline' })} to="/schedule">
+              <CalendarDays aria-hidden="true" />
+              View schedule
+            </Link>
+            <Link className={buttonVariants()} to="/bookings/new">
+              <Plus aria-hidden="true" />
+              New booking
+            </Link>
+          </>
+        }
+        description="See today's room activity and upcoming meetings at a glance."
+        eyebrow={fullDateFormatter.format(now)}
+        title={getGreeting(now.getHours())}
+      />
 
       <div className="mt-8">
         {isLoading ? (
