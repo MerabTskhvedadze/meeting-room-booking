@@ -8,7 +8,6 @@ import {
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import { buttonVariants } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
   SidebarContent,
