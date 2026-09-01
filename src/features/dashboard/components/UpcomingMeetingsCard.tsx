@@ -14,7 +14,8 @@ import {
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
-import { formatMeetingDay, timeFormatter } from '../utils/date'
+import { timeFormatter } from '@/utils/date'
+import { formatMeetingDay } from '../utils/date'
 
 interface UpcomingMeetingsCardProps {
   bookings: Booking[]

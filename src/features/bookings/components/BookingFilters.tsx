@@ -12,43 +12,38 @@ import {
 } from '@/components/ui/select'
 import type { Room } from '@/types/room'
 
-interface RoomFiltersProps {
-  amenity: string
-  capacity: string
-  floor: string
+interface BookingFiltersProps {
   onClear: () => void
   onFilterChange: (
-    name: 'search' | 'floor' | 'capacity' | 'amenity',
+    name: 'search' | 'room' | 'status' | 'period',
     value: string,
   ) => void
+  period: string
+  room: string
   rooms: Room[]
   search: string
+  status: string
 }
 
 const ALL_OPTIONS = 'all-options'
 
-export function RoomFilters({
-  amenity,
-  capacity,
-  floor,
+export function BookingFilters({
   onClear,
   onFilterChange,
+  period,
+  room,
   rooms,
   search,
-}: RoomFiltersProps) {
-  const floors = [...new Set(rooms.map((room) => room.floor))].sort((a, b) => a - b)
-  const capacities = [...new Set(rooms.map((room) => room.capacity))].sort(
-    (a, b) => a - b,
-  )
-  const amenities = [...new Set(rooms.flatMap((room) => room.amenities))].sort()
-  const hasFilters = Boolean(search || floor || capacity || amenity)
+  status,
+}: BookingFiltersProps) {
+  const hasFilters = Boolean(search || room || status || period)
 
   return (
-    <Card aria-label="Room filters" className="mt-8" role="region">
+    <Card aria-label="Booking filters" className="mt-8" role="region">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <SlidersHorizontal aria-hidden="true" size={17} />
-          Find the right room
+          Find a booking
         </CardTitle>
 
         {hasFilters ? (
@@ -68,7 +63,7 @@ export function RoomFilters({
 
       <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <label className="relative md:col-span-2">
-          <span className="sr-only">Search rooms</span>
+          <span className="sr-only">Search bookings</span>
           <Search
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-muted-foreground"
@@ -77,7 +72,7 @@ export function RoomFilters({
           <Input
             className="pl-9"
             onChange={(event) => onFilterChange('search', event.target.value)}
-            placeholder="Search by room or amenity"
+            placeholder="Search meetings, rooms, or organizers"
             type="search"
             value={search}
           />
@@ -85,43 +80,24 @@ export function RoomFilters({
 
         <Select
           onValueChange={(value) =>
-            onFilterChange('floor', value === ALL_OPTIONS ? '' : (value ?? ''))
+            onFilterChange('room', value === ALL_OPTIONS ? '' : (value ?? ''))
           }
-          value={floor || ALL_OPTIONS}
+          value={room || ALL_OPTIONS}
         >
-          <SelectTrigger aria-label="Floor" className="w-full">
-            <SelectValue>
-              {(value: string) => (value === ALL_OPTIONS ? 'Any floor' : `Floor ${value}`)}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_OPTIONS}>Any floor</SelectItem>
-            {floors.map((floorNumber) => (
-              <SelectItem key={floorNumber} value={String(floorNumber)}>
-                Floor {floorNumber}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          onValueChange={(value) =>
-            onFilterChange('capacity', value === ALL_OPTIONS ? '' : (value ?? ''))
-          }
-          value={capacity || ALL_OPTIONS}
-        >
-          <SelectTrigger aria-label="Minimum capacity" className="w-full">
+          <SelectTrigger aria-label="Room" className="w-full">
             <SelectValue>
               {(value: string) =>
-                value === ALL_OPTIONS ? 'Any capacity' : `${value}+ people`
+                value === ALL_OPTIONS
+                  ? 'Any room'
+                  : (rooms.find((item) => item.id === value)?.name ?? 'Any room')
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL_OPTIONS}>Any capacity</SelectItem>
-            {capacities.map((roomCapacity) => (
-              <SelectItem key={roomCapacity} value={String(roomCapacity)}>
-                {roomCapacity}+ people
+            <SelectItem value={ALL_OPTIONS}>Any room</SelectItem>
+            {rooms.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                {item.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -129,22 +105,45 @@ export function RoomFilters({
 
         <Select
           onValueChange={(value) =>
-            onFilterChange('amenity', value === ALL_OPTIONS ? '' : (value ?? ''))
+            onFilterChange('status', value === ALL_OPTIONS ? '' : (value ?? ''))
           }
-          value={amenity || ALL_OPTIONS}
+          value={status || ALL_OPTIONS}
         >
-          <SelectTrigger aria-label="Amenity" className="w-full">
+          <SelectTrigger aria-label="Status" className="w-full">
             <SelectValue>
-              {(value: string) => (value === ALL_OPTIONS ? 'Any amenity' : value)}
+              {(value: string) => {
+                if (value === 'confirmed') return 'Confirmed'
+                if (value === 'cancelled') return 'Cancelled'
+                return 'Any status'
+              }}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL_OPTIONS}>Any amenity</SelectItem>
-            {amenities.map((roomAmenity) => (
-              <SelectItem key={roomAmenity} value={roomAmenity}>
-                {roomAmenity}
-              </SelectItem>
-            ))}
+            <SelectItem value={ALL_OPTIONS}>Any status</SelectItem>
+            <SelectItem value="confirmed">Confirmed</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          onValueChange={(value) =>
+            onFilterChange('period', value === ALL_OPTIONS ? '' : (value ?? ''))
+          }
+          value={period || ALL_OPTIONS}
+        >
+          <SelectTrigger aria-label="Time period" className="w-full">
+            <SelectValue>
+              {(value: string) => {
+                if (value === 'upcoming') return 'Upcoming & active'
+                if (value === 'past') return 'Past'
+                return 'Any time'
+              }}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_OPTIONS}>Any time</SelectItem>
+            <SelectItem value="upcoming">Upcoming &amp; active</SelectItem>
+            <SelectItem value="past">Past</SelectItem>
           </SelectContent>
         </Select>
       </CardContent>
