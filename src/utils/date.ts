@@ -23,3 +23,10 @@ export function isSameLocalDay(first: Date, second: Date) {
     first.getDate() === second.getDate()
   )
 }
+
+export function toDateTimeLocalValue(value: string) {
+  const date = new Date(value)
+  const timezoneOffset = date.getTimezoneOffset() * 60_000
+
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 16)
+}

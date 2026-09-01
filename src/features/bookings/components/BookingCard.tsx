@@ -1,13 +1,12 @@
 import { ArrowRight, CalendarDays, Clock3, MapPin, UserRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
-import { isBookingActive, isBookingPast } from '@/utils/booking'
 import { dateFormatter, timeFormatter } from '@/utils/date'
+import { BookingStatusBadge } from './BookingStatusBadge'
 
 interface BookingCardProps {
   booking: Booking
@@ -16,26 +15,9 @@ interface BookingCardProps {
   room?: Room
 }
 
-function getBookingState(booking: Booking, now: Date) {
-  if (booking.status === 'cancelled') {
-    return { label: 'Cancelled', variant: 'destructive' as const }
-  }
-
-  if (isBookingPast(booking, now)) {
-    return { label: 'Past', variant: 'outline' as const }
-  }
-
-  if (isBookingActive(booking, now)) {
-    return { label: 'In progress', variant: 'default' as const }
-  }
-
-  return { label: 'Upcoming', variant: 'secondary' as const }
-}
-
 export function BookingCard({ booking, employee, now, room }: BookingCardProps) {
   const start = new Date(booking.startTime)
   const end = new Date(booking.endTime)
-  const bookingState = getBookingState(booking, now)
 
   return (
     <Card className="group transition hover:ring-primary/20 hover:shadow-sm">
@@ -61,7 +43,7 @@ export function BookingCard({ booking, employee, now, room }: BookingCardProps) 
               <h2 className="truncate font-heading text-base font-medium group-hover:underline">
                 {booking.title}
               </h2>
-              <Badge variant={bookingState.variant}>{bookingState.label}</Badge>
+              <BookingStatusBadge booking={booking} now={now} />
             </div>
             <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
               {booking.description || 'No description provided.'}
