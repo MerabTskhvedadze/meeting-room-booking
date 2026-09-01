@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { isBookingActive, isBookingPast } from '@/utils/booking'
 import { dateFormatter, timeFormatter } from '@/utils/date'
 
 interface BookingCardProps {
@@ -20,11 +21,11 @@ function getBookingState(booking: Booking, now: Date) {
     return { label: 'Cancelled', variant: 'destructive' as const }
   }
 
-  if (Date.parse(booking.endTime) <= now.getTime()) {
+  if (isBookingPast(booking, now)) {
     return { label: 'Past', variant: 'outline' as const }
   }
 
-  if (Date.parse(booking.startTime) <= now.getTime()) {
+  if (isBookingActive(booking, now)) {
     return { label: 'In progress', variant: 'default' as const }
   }
 

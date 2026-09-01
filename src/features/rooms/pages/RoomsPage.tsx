@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
 import { LoadError } from '@/components/LoadError'
+import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { getRooms } from '@/services/roomService'
 import type { Room } from '@/types/room'
@@ -87,21 +88,18 @@ export function RoomsPage() {
 
   return (
     <section>
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-semibold text-primary">Spaces</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight">Meeting rooms</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Find a room that fits your team, floor, and equipment needs.
-          </p>
-        </div>
-
-        {!isLoading && !error ? (
-          <Badge aria-live="polite" variant="secondary">
-            {filteredRooms.length} {filteredRooms.length === 1 ? 'room' : 'rooms'} found
-          </Badge>
-        ) : null}
-      </div>
+      <PageHeader
+        actions={
+          !isLoading && !error ? (
+            <Badge aria-live="polite" variant="secondary">
+              {filteredRooms.length} {filteredRooms.length === 1 ? 'room' : 'rooms'} found
+            </Badge>
+          ) : null
+        }
+        description="Find a room that fits your team, floor, and equipment needs."
+        eyebrow="Spaces"
+        title="Meeting rooms"
+      />
 
       <RoomFilters
         amenity={amenity}
