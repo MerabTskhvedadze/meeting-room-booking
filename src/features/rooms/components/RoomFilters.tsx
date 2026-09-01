@@ -1,11 +1,23 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 
-import type { Room } from '../../../types/room'
+import { Button } from '@/components/ui/button'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import type { Room } from '@/types/room'
 
 interface RoomFiltersProps {
   rooms: Room[]
 }
+
+const ALL_OPTIONS = 'all-options'
 
 export function RoomFilters({ rooms }: RoomFiltersProps) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -24,7 +36,7 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
   function updateFilter(name: string, value: string) {
     const nextParams = new URLSearchParams(searchParams)
 
-    if (value) {
+    if (value && value !== ALL_OPTIONS) {
       nextParams.set(name, value)
     } else {
       nextParams.delete(name)
@@ -34,38 +46,38 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
   }
 
   return (
-    <section
-      aria-label="Room filters"
-      className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
-    >
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+    <Card aria-label="Room filters" className="mt-8" role="region">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
           <SlidersHorizontal aria-hidden="true" size={17} />
           Find the right room
-        </div>
+        </CardTitle>
 
         {hasFilters ? (
-          <button
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-900"
-            onClick={() => setSearchParams({}, { replace: true })}
-            type="button"
-          >
-            <X aria-hidden="true" size={15} />
-            Clear
-          </button>
+          <CardAction>
+            <Button
+              onClick={() => setSearchParams({}, { replace: true })}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              <X aria-hidden="true" />
+              Clear
+            </Button>
+          </CardAction>
         ) : null}
-      </div>
+      </CardHeader>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         <label className="relative md:col-span-2">
           <span className="sr-only">Search rooms</span>
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute top-1/2 left-2.5 z-10 -translate-y-1/2 text-muted-foreground"
             size={18}
           />
-          <input
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 hover:border-slate-400 focus:border-indigo-500 focus:outline-none"
+          <Input
+            className="pl-9"
             onChange={(event) => updateFilter('search', event.target.value)}
             placeholder="Search by room or amenity"
             type="search"
@@ -73,54 +85,65 @@ export function RoomFilters({ rooms }: RoomFiltersProps) {
           />
         </label>
 
-        <label>
-          <span className="sr-only">Floor</span>
-          <select
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 hover:border-slate-400 focus:border-indigo-500 focus:outline-none"
-            onChange={(event) => updateFilter('floor', event.target.value)}
-            value={floor}
-          >
-            <option value="">Any floor</option>
+        <Select
+          onValueChange={(value) => updateFilter('floor', value ?? '')}
+          value={floor || ALL_OPTIONS}
+        >
+          <SelectTrigger aria-label="Floor" className="w-full">
+            <SelectValue>
+              {(value: string) => (value === ALL_OPTIONS ? 'Any floor' : `Floor ${value}`)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_OPTIONS}>Any floor</SelectItem>
             {floors.map((floorNumber) => (
-              <option key={floorNumber} value={floorNumber}>
+              <SelectItem key={floorNumber} value={String(floorNumber)}>
                 Floor {floorNumber}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </label>
+          </SelectContent>
+        </Select>
 
-        <label>
-          <span className="sr-only">Minimum capacity</span>
-          <select
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 hover:border-slate-400 focus:border-indigo-500 focus:outline-none"
-            onChange={(event) => updateFilter('capacity', event.target.value)}
-            value={capacity}
-          >
-            <option value="">Any capacity</option>
+        <Select
+          onValueChange={(value) => updateFilter('capacity', value ?? '')}
+          value={capacity || ALL_OPTIONS}
+        >
+          <SelectTrigger aria-label="Minimum capacity" className="w-full">
+            <SelectValue>
+              {(value: string) =>
+                value === ALL_OPTIONS ? 'Any capacity' : `${value}+ people`
+              }
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_OPTIONS}>Any capacity</SelectItem>
             {capacities.map((roomCapacity) => (
-              <option key={roomCapacity} value={roomCapacity}>
+              <SelectItem key={roomCapacity} value={String(roomCapacity)}>
                 {roomCapacity}+ people
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </label>
+          </SelectContent>
+        </Select>
 
-        <label>
-          <span className="sr-only">Amenity</span>
-          <select
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 hover:border-slate-400 focus:border-indigo-500 focus:outline-none"
-            onChange={(event) => updateFilter('amenity', event.target.value)}
-            value={amenity}
-          >
-            <option value="">Any amenity</option>
+        <Select
+          onValueChange={(value) => updateFilter('amenity', value ?? '')}
+          value={amenity || ALL_OPTIONS}
+        >
+          <SelectTrigger aria-label="Amenity" className="w-full">
+            <SelectValue>
+              {(value: string) => (value === ALL_OPTIONS ? 'Any amenity' : value)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_OPTIONS}>Any amenity</SelectItem>
             {amenities.map((roomAmenity) => (
-              <option key={roomAmenity} value={roomAmenity}>
+              <SelectItem key={roomAmenity} value={roomAmenity}>
                 {roomAmenity}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-        </label>
-      </div>
-    </section>
+          </SelectContent>
+        </Select>
+      </CardContent>
+    </Card>
   )
 }

@@ -2,8 +2,12 @@ import { Building2, RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { getRooms } from '../../../services/roomService'
-import type { Room } from '../../../types/room'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { getRooms } from '@/services/roomService'
+import type { Room } from '@/types/room'
 import { RoomCard } from '../components/RoomCard'
 import { RoomFilters } from '../components/RoomFilters'
 
@@ -62,17 +66,17 @@ export function RoomsPage() {
     <section>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-semibold text-indigo-600">Spaces</p>
+          <p className="text-sm font-semibold text-primary">Spaces</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">Meeting rooms</h1>
-          <p className="mt-2 max-w-2xl text-slate-600">
+          <p className="mt-2 max-w-2xl text-muted-foreground">
             Find a room that fits your team, floor, and equipment needs.
           </p>
         </div>
 
         {!isLoading && !error ? (
-          <p aria-live="polite" className="text-sm font-medium text-slate-500">
+          <Badge aria-live="polite" variant="secondary">
             {filteredRooms.length} {filteredRooms.length === 1 ? 'room' : 'rooms'} found
-          </p>
+          </Badge>
         ) : null}
       </div>
 
@@ -81,36 +85,38 @@ export function RoomsPage() {
       {isLoading ? (
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading rooms">
           {loadingCards.map((card) => (
-            <div
-              className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white p-6"
-              key={card}
-            >
-              <div className="size-11 rounded-xl bg-slate-200" />
-              <div className="mt-5 h-5 w-2/3 rounded bg-slate-200" />
-              <div className="mt-4 h-4 w-1/2 rounded bg-slate-100" />
-              <div className="mt-6 flex gap-2">
-                <div className="h-7 w-24 rounded bg-slate-100" />
-                <div className="h-7 w-20 rounded bg-slate-100" />
-              </div>
-            </div>
+            <Card aria-hidden="true" className="h-72" key={card}>
+              <CardContent>
+                <Skeleton className="size-10 rounded-lg" />
+                <Skeleton className="mt-5 h-5 w-2/3" />
+                <Skeleton className="mt-4 h-4 w-1/2" />
+                <div className="mt-6 flex gap-2">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : error ? (
-        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-10 text-center">
-          <p className="font-semibold text-rose-900">{error}</p>
-          <button
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-rose-700 shadow-sm ring-1 ring-rose-200 hover:bg-rose-100"
-            onClick={() => {
-              setIsLoading(true)
-              setError('')
-              setLoadAttempt((attempt) => attempt + 1)
-            }}
-            type="button"
-          >
-            <RotateCcw aria-hidden="true" size={16} />
-            Try again
-          </button>
-        </div>
+        <Card className="mt-6 border-destructive/20 bg-destructive/5 text-center ring-destructive/20">
+          <CardContent className="py-6">
+            <p className="font-semibold text-destructive">{error}</p>
+            <Button
+              className="mt-4"
+              onClick={() => {
+                setIsLoading(true)
+                setError('')
+                setLoadAttempt((attempt) => attempt + 1)
+              }}
+              type="button"
+              variant="destructive"
+            >
+              <RotateCcw aria-hidden="true" />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
       ) : filteredRooms.length > 0 ? (
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredRooms.map((room) => (
@@ -118,22 +124,25 @@ export function RoomsPage() {
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-            <Building2 aria-hidden="true" size={22} />
-          </div>
-          <h2 className="mt-4 text-lg font-semibold">No rooms match your filters</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Try changing your search or clearing the selected filters.
-          </p>
-          <button
-            className="mt-5 text-sm font-semibold text-indigo-700 hover:text-indigo-900"
-            onClick={() => setSearchParams({}, { replace: true })}
-            type="button"
-          >
-            Clear all filters
-          </button>
-        </div>
+        <Card className="mt-6 border-dashed text-center">
+          <CardContent className="py-10">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <Building2 aria-hidden="true" size={22} />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold">No rooms match your filters</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Try changing your search or clearing the selected filters.
+            </p>
+            <Button
+              className="mt-4"
+              onClick={() => setSearchParams({}, { replace: true })}
+              type="button"
+              variant="outline"
+            >
+              Clear all filters
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </section>
   )
