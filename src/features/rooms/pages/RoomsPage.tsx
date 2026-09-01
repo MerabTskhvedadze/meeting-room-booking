@@ -1,17 +1,15 @@
-import { Building2, RotateCcw } from 'lucide-react'
+import { Building2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
+import { EmptyState } from '@/components/EmptyState'
+import { LoadError } from '@/components/LoadError'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import { getRooms } from '@/services/roomService'
 import type { Room } from '@/types/room'
 import { RoomCard } from '../components/RoomCard'
 import { RoomFilters } from '../components/RoomFilters'
-
-const loadingCards = ['loading-1', 'loading-2', 'loading-3']
+import { RoomsLoading } from '../components/RoomsLoading'
 
 export function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([])
@@ -62,6 +60,12 @@ export function RoomsPage() {
     return matchesSearch && matchesFloor && matchesCapacity && matchesAmenity
   })
 
+  function retryLoading() {
+    setIsLoading(true)
+    setError('')
+    setLoadAttempt((attempt) => attempt + 1)
+  }
+
   return (
     <section>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -83,40 +87,9 @@ export function RoomsPage() {
       <RoomFilters rooms={rooms} />
 
       {isLoading ? (
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading rooms">
-          {loadingCards.map((card) => (
-            <Card aria-hidden="true" className="h-72" key={card}>
-              <CardContent>
-                <Skeleton className="size-10 rounded-lg" />
-                <Skeleton className="mt-5 h-5 w-2/3" />
-                <Skeleton className="mt-4 h-4 w-1/2" />
-                <div className="mt-6 flex gap-2">
-                  <Skeleton className="h-5 w-24 rounded-full" />
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <RoomsLoading />
       ) : error ? (
-        <Card className="mt-6 border-destructive/20 bg-destructive/5 text-center ring-destructive/20">
-          <CardContent className="py-6">
-            <p className="font-semibold text-destructive">{error}</p>
-            <Button
-              className="mt-4"
-              onClick={() => {
-                setIsLoading(true)
-                setError('')
-                setLoadAttempt((attempt) => attempt + 1)
-              }}
-              type="button"
-              variant="destructive"
-            >
-              <RotateCcw aria-hidden="true" />
-              Try again
-            </Button>
-          </CardContent>
-        </Card>
+        <LoadError className="mt-6" message={error} onRetry={retryLoading} />
       ) : filteredRooms.length > 0 ? (
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredRooms.map((room) => (
@@ -124,25 +97,14 @@ export function RoomsPage() {
           ))}
         </div>
       ) : (
-        <Card className="mt-6 border-dashed text-center">
-          <CardContent className="py-10">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <Building2 aria-hidden="true" size={22} />
-            </div>
-            <h2 className="mt-4 text-lg font-semibold">No rooms match your filters</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Try changing your search or clearing the selected filters.
-            </p>
-            <Button
-              className="mt-4"
-              onClick={() => setSearchParams({}, { replace: true })}
-              type="button"
-              variant="outline"
-            >
-              Clear all filters
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          actionLabel="Clear all filters"
+          className="mt-6"
+          description="Try changing your search or clearing the selected filters."
+          icon={<Building2 aria-hidden="true" size={22} />}
+          onAction={() => setSearchParams({}, { replace: true })}
+          title="No rooms match your filters"
+        />
       )}
     </section>
   )

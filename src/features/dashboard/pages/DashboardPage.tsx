@@ -1,20 +1,21 @@
-import { CalendarDays, Plus, RotateCcw } from 'lucide-react'
+import { CalendarDays, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { LoadError } from '@/components/LoadError'
+import { buttonVariants } from '@/components/ui/button'
 import { getBookings } from '@/services/bookingService'
 import { getEmployees } from '@/services/employeeService'
 import { getRooms } from '@/services/roomService'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { fullDateFormatter, isSameLocalDay } from '@/utils/date'
 import { DashboardLoading } from '../components/DashboardLoading'
 import { DashboardMetrics } from '../components/DashboardMetrics'
 import { RoomStatusCard } from '../components/RoomStatusCard'
 import { UpcomingMeetingsCard } from '../components/UpcomingMeetingsCard'
-import { fullDateFormatter, getGreeting, isSameLocalDay } from '../utils/date'
+import { getGreeting } from '../utils/date'
 
 export function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -108,15 +109,7 @@ export function DashboardPage() {
         {isLoading ? (
           <DashboardLoading />
         ) : error ? (
-          <Card className="border-destructive/20 bg-destructive/5 text-center ring-destructive/20">
-            <CardContent className="py-8">
-              <p className="font-medium text-destructive">{error}</p>
-              <Button className="mt-4" onClick={retryLoading} variant="destructive">
-                <RotateCcw aria-hidden="true" />
-                Try again
-              </Button>
-            </CardContent>
-          </Card>
+          <LoadError message={error} onRetry={retryLoading} />
         ) : (
           <>
             <DashboardMetrics
