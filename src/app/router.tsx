@@ -7,7 +7,7 @@ import { BookingsPage } from '../features/bookings/pages/BookingsPage'
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage'
 import { NotFoundPage } from '../features/errors/pages/NotFoundPage'
 import { RoomsPage } from '../features/rooms/pages/RoomsPage'
-import { SchedulePage } from '../features/schedule/pages/SchedulePage'
+import { ScheduleLoading } from '../features/schedule/components/ScheduleLoading'
 
 export const router = createBrowserRouter([
   {
@@ -16,7 +16,17 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: DashboardPage },
       { path: 'rooms', Component: RoomsPage },
-      { path: 'schedule', Component: SchedulePage },
+      {
+        path: 'schedule',
+        HydrateFallback: ScheduleLoading,
+        lazy: async () => {
+          const { SchedulePage } = await import(
+            '../features/schedule/pages/SchedulePage'
+          )
+
+          return { Component: SchedulePage }
+        },
+      },
       { path: 'bookings', Component: BookingsPage },
       { path: 'bookings/new', Component: BookingFormPage },
       { path: 'bookings/:bookingId', Component: BookingDetailsPage },

@@ -1,0 +1,97 @@
+.schedule-calendar {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  padding: 1rem;
+}
+
+.schedule-calendar .fc {
+  --fc-border-color: var(--border);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: color-mix(in oklch, var(--primary), white 12%);
+  --fc-button-hover-border-color: var(--primary);
+  --fc-button-active-bg-color: color-mix(in oklch, var(--primary), white 18%);
+  --fc-button-active-border-color: var(--primary);
+  --fc-event-bg-color: #4f46e5;
+  --fc-event-border-color: #4338ca;
+  --fc-event-text-color: white;
+  --fc-list-event-hover-bg-color: var(--muted);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-page-bg-color: var(--card);
+  --fc-today-bg-color: color-mix(in oklch, #4f46e5 7%, transparent);
+  font-family: var(--font-sans);
+}
+
+.schedule-calendar .fc-toolbar-title {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.schedule-calendar .fc-button {
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.schedule-calendar .fc-event {
+  border-radius: var(--radius-sm);
+  padding: 0.125rem;
+}
+
+.schedule-calendar .fc-timegrid-slot {
+  height: 2.75rem;
+}
+
+.schedule-calendar .fc-col-header-cell-cushion,
+.schedule-calendar .fc-timegrid-axis-cushion,
+.schedule-calendar .fc-timegrid-slot-label-cushion {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+@media (max-width: 639px) {
+  .schedule-calendar {
+    padding: 0.75rem;
+  }
+
+  .schedule-calendar .fc-header-toolbar {
+    align-items: stretch;
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .schedule-calendar .fc-toolbar-chunk:first-child {
+    display: flex;
+  }
+
+  .schedule-calendar .fc-toolbar-chunk:first-child .fc-today-button {
+    flex: 1;
+  }
+
+  .schedule-calendar .fc-toolbar-title {
+    overflow-wrap: anywhere;
+    font-size: 1rem;
+    line-height: 1.3;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .schedule-calendar .fc-list-event,
+  .schedule-calendar .fc-list-event-title {
+    min-width: 0;
+  }
+
+  .schedule-calendar .fc-list-event-title {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .schedule-calendar .fc-list-event-time {
+    white-space: nowrap;
+  }
+}
