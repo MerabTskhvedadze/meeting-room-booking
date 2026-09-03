@@ -20,7 +20,7 @@ export function ScheduleLoading() {
             <Skeleton className="h-8 w-40" />
             <Skeleton className="h-6 w-48" />
           </div>
-          <Skeleton className="mt-5 h-[520px] w-full" />
+          <Skeleton className="mt-5 h-130 w-full" />
         </CardContent>
       </Card>
     </div>
