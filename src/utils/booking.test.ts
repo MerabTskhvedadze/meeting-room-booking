@@ -1,37 +1,86 @@
 import { describe, expect, it } from 'vitest'
-
 import type { Booking } from '@/types/booking'
 import { isBookingActive, isBookingPast, isBookingUpcoming } from './booking'
 
-const now = new Date('2026-09-01T10:00:00.000Z')
-
-const booking: Booking = {
-  id: 'booking-1',
-  roomId: 'room-101',
-  employeeId: 'emp-1',
-  title: 'Planning meeting',
-  description: 'Plan the next milestone.',
-  startTime: '2026-09-01T09:00:00.000Z',
-  endTime: '2026-09-01T11:00:00.000Z',
-  status: 'confirmed',
-  createdAt: '2026-08-25T09:00:00.000Z',
+function makeBooking(start: string, end: string): Booking {
+  return {
+    id: 'test-booking',
+    roomId: 'room-101',
+    employeeId: 'emp-1',
+    title: 'Test',
+    description: '',
+    startTime: start,
+    endTime: end,
+    status: 'confirmed',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  }
 }
 
-describe('booking lifecycle utilities', () => {
-  it('treats a booking as past when its end time is reached', () => {
-    expect(isBookingPast({ ...booking, endTime: now.toISOString() }, now)).toBe(true)
-    expect(isBookingPast(booking, now)).toBe(false)
+// Fixed reference point: 2026-09-04 at noon UTC.
+const NOW = new Date('2026-09-04T12:00:00.000Z')
+
+const PAST_BOOKING = makeBooking('2026-09-04T09:00:00.000Z', '2026-09-04T10:00:00.000Z')
+const ACTIVE_BOOKING = makeBooking('2026-09-04T11:00:00.000Z', '2026-09-04T13:00:00.000Z')
+const UPCOMING_BOOKING = makeBooking('2026-09-05T10:00:00.000Z', '2026-09-05T11:00:00.000Z')
+
+describe('isBookingPast', () => {
+  it('returns true when the booking has already ended', () => {
+    expect(isBookingPast(PAST_BOOKING, NOW)).toBe(true)
   })
 
-  it('treats a booking as active from its start until its end', () => {
-    expect(isBookingActive({ ...booking, startTime: now.toISOString() }, now)).toBe(true)
-    expect(isBookingActive({ ...booking, endTime: now.toISOString() }, now)).toBe(false)
+  it('returns false while the booking is in progress', () => {
+    expect(isBookingPast(ACTIVE_BOOKING, NOW)).toBe(false)
   })
 
-  it('treats a booking as upcoming only before its start time', () => {
-    expect(
-      isBookingUpcoming({ ...booking, startTime: '2026-09-01T10:01:00.000Z' }, now),
-    ).toBe(true)
-    expect(isBookingUpcoming({ ...booking, startTime: now.toISOString() }, now)).toBe(false)
+  it('returns false for a future booking', () => {
+    expect(isBookingPast(UPCOMING_BOOKING, NOW)).toBe(false)
+  })
+
+  it('returns true when end time is exactly equal to now (boundary)', () => {
+    const booking = makeBooking('2026-09-04T11:00:00.000Z', NOW.toISOString())
+    expect(isBookingPast(booking, NOW)).toBe(true)
+  })
+})
+
+describe('isBookingActive', () => {
+  it('returns true while the meeting is in progress', () => {
+    expect(isBookingActive(ACTIVE_BOOKING, NOW)).toBe(true)
+  })
+
+  it('returns false before the booking starts', () => {
+    expect(isBookingActive(UPCOMING_BOOKING, NOW)).toBe(false)
+  })
+
+  it('returns false after the booking has ended', () => {
+    expect(isBookingActive(PAST_BOOKING, NOW)).toBe(false)
+  })
+
+  it('returns true when now equals start time (meeting just started)', () => {
+    const booking = makeBooking(NOW.toISOString(), '2026-09-04T13:00:00.000Z')
+    expect(isBookingActive(booking, NOW)).toBe(true)
+  })
+
+  it('returns false when now equals end time (meeting just finished)', () => {
+    const booking = makeBooking('2026-09-04T11:00:00.000Z', NOW.toISOString())
+    expect(isBookingActive(booking, NOW)).toBe(false)
+  })
+})
+
+describe('isBookingUpcoming', () => {
+  it('returns true before the booking starts', () => {
+    expect(isBookingUpcoming(UPCOMING_BOOKING, NOW)).toBe(true)
+  })
+
+  it('returns false while the booking is in progress', () => {
+    expect(isBookingUpcoming(ACTIVE_BOOKING, NOW)).toBe(false)
+  })
+
+  it('returns false after the booking has ended', () => {
+    expect(isBookingUpcoming(PAST_BOOKING, NOW)).toBe(false)
+  })
+
+  it('returns false when now equals start time (no longer upcoming)', () => {
+    const booking = makeBooking(NOW.toISOString(), '2026-09-04T13:00:00.000Z')
+    expect(isBookingUpcoming(booking, NOW)).toBe(false)
   })
 })

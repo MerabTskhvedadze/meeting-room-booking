@@ -1,75 +1,69 @@
-# React + TypeScript + Vite
+# Meeting Room Booking
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An internal web application for managing meeting room bookings. Built as a take-home assignment for a Front-End Developer position.
 
-Currently, two official plugins are available:
+## Live Demo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+[View the deployed application](https://meeting-room-booking-ebon.vercel.app/)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Dashboard** — at-a-glance metrics for today's meetings, room availability, and upcoming bookings
+- **Rooms** — browse all meeting rooms with search and filter (floor, capacity, amenity)
+- **Schedule** — day and week calendar views per room or across all rooms
+- **Bookings** — create, view, edit, cancel, search, and filter bookings
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Concern | Choice |
+|---|---|
+| Framework | React 19 + TypeScript + Vite |
+| Routing | React Router v7 |
+| UI components | shadcn/ui (Radix UI + Tailwind CSS v4) |
+| Calendar | FullCalendar v7 |
+| Icons | Lucide React |
+| Font | Geist Variable |
+| Testing | Vitest |
+| Deployment | Vercel |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Other scripts:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build    # production build
+npm run preview  # preview the production build locally
+npm run test     # run unit tests
+npm run lint     # lint the project
 ```
+
+## Architecture Decisions
+
+### Data layer
+
+The app has no backend. Initial data is loaded from JSON files in `src/data/` (rooms, employees, and seed bookings). All data access goes through service functions in `src/services/` that expose an async, API-shaped interface — `getBookings()`, `createBooking()`, `updateBooking()`, etc. The UI only ever calls these functions, never importing the JSON directly. Replacing them with real API calls in the future requires no changes to the UI.
+
+### Persistence
+
+Booking mutations (create, update, cancel) are saved to `localStorage`. Rooms and employees are treated as read-only reference data (as they would be in a real system managed by an admin).
+
+### URL state
+
+Filter parameters for the Rooms and Bookings pages, and the selected room, view, and date for the Schedule, are stored in the URL. This keeps pages bookmarkable and makes the browser back button work correctly.
+
+### Validation and conflict detection
+
+Booking validation (required fields, time ordering, future-only start times) and room conflict detection run in the service layer, not in the UI. This mirrors where these checks would live if the service functions were replaced with API calls.
+
+## Trade-offs and Assumptions
+
+- **No authentication** — the assignment targets internal employees, so there is no login flow. The "organizer" field on a booking acts as the booking owner.
+- **Rooms and employees are static** — only bookings are mutable. Adding or removing rooms and employees is out of scope for this assignment.
+- **Single timezone** — all times are stored as ISO 8601 strings and displayed using the browser's local timezone via `Intl.DateTimeFormat`. A multi-timezone office would need explicit timezone handling.
+- **No recurring bookings** — each booking is a one-off event.
+- **Schedule visible hours** — the calendar view shows 07:00–19:00 to cover early and standard business hours. Bookings outside this window are not displayed in the time-grid view (they remain accessible from the Bookings list and detail pages).

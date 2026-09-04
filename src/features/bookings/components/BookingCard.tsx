@@ -20,7 +20,7 @@ export function BookingCard({ booking, employee, now, room }: BookingCardProps) 
   const end = new Date(booking.endTime)
 
   return (
-    <Card className="group transition hover:ring-primary/20 hover:shadow-sm">
+    <Card className="group transition-[box-shadow] hover:ring-primary/20 hover:shadow-sm">
       <CardContent>
         <Link
           aria-label={`View ${booking.title}`}

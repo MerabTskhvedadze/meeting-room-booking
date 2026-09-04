@@ -1,75 +1,36 @@
-import { ArrowLeft, CalendarX2, Pencil } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ArrowLeft, CalendarX2, CircleCheck, Pencil } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
-import { cancelBooking, getBookingById } from '@/services/bookingService'
-import { getEmployees } from '@/services/employeeService'
-import { getRooms } from '@/services/roomService'
-import type { Booking } from '@/types/booking'
-import type { Employee } from '@/types/employee'
-import type { Room } from '@/types/room'
+import { cancelBooking } from '@/services/bookingService'
 import { isBookingUpcoming } from '@/utils/booking'
+import { getErrorMessage } from '@/utils/error'
 import { BookingDetailsCard } from '../components/BookingDetailsCard'
 import { BookingDetailsLoading } from '../components/BookingDetailsLoading'
 import { CancelBookingPanel } from '../components/CancelBookingPanel'
+import { useBookingDetails } from '../hooks/useBookingDetails'
 
 export function BookingDetailsPage() {
   const { bookingId } = useParams()
   const navigate = useNavigate()
-  const [booking, setBooking] = useState<Booking | null>(null)
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [loadAttempt, setLoadAttempt] = useState(0)
+  const { data, error, isLoading, retry } = useBookingDetails(bookingId ?? '')
+  const booking = data?.booking ?? null
+  const employee = data?.employee
+  const room = data?.room
   const [isConfirmingCancellation, setIsConfirmingCancellation] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [cancellationError, setCancellationError] = useState('')
+  const [cancellationSucceeded, setCancellationSucceeded] = useState(false)
 
-  useEffect(() => {
-    let shouldUpdate = true
-
-    Promise.all([getBookingById(bookingId ?? ''), getRooms(), getEmployees()])
-      .then(([loadedBooking, loadedRooms, loadedEmployees]) => {
-        if (shouldUpdate) {
-          setBooking(loadedBooking)
-          setRooms(loadedRooms)
-          setEmployees(loadedEmployees)
-        }
-      })
-      .catch(() => {
-        if (shouldUpdate) {
-          setError('Booking details could not be loaded. Please try again.')
-        }
-      })
-      .finally(() => {
-        if (shouldUpdate) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      shouldUpdate = false
-    }
-  }, [bookingId, loadAttempt])
+  useDocumentTitle(booking?.title ?? 'Booking details')
 
   const now = new Date()
-  const room = booking ? rooms.find((item) => item.id === booking.roomId) : undefined
-  const employee = booking
-    ? employees.find((item) => item.id === booking.employeeId)
-    : undefined
-  const canManageBooking =
-    booking?.status === 'confirmed' && isBookingUpcoming(booking, now)
-
-  function retryLoading() {
-    setIsLoading(true)
-    setError('')
-    setLoadAttempt((attempt) => attempt + 1)
-  }
+  const canManageBooking = booking?.status === 'confirmed' && isBookingUpcoming(booking, now)
 
   async function handleCancellation() {
     if (!booking) {
@@ -80,14 +41,13 @@ export function BookingDetailsPage() {
     setCancellationError('')
 
     try {
-      const cancelledBooking = await cancelBooking(booking.id)
-      setBooking(cancelledBooking)
+      await cancelBooking(booking.id)
       setIsConfirmingCancellation(false)
+      setCancellationSucceeded(true)
+      retry()
     } catch (cancellationFailure) {
       setCancellationError(
-        cancellationFailure instanceof Error
-          ? cancellationFailure.message
-          : 'The booking could not be cancelled.',
+        getErrorMessage(cancellationFailure, 'The booking could not be cancelled.'),
       )
     } finally {
       setIsCancelling(false)
@@ -119,10 +79,22 @@ export function BookingDetailsPage() {
       {isLoading ? (
         <BookingDetailsLoading />
       ) : error ? (
-        <LoadError className="mt-8" message={error} onRetry={retryLoading} />
+        <LoadError className="mt-8" message={error} onRetry={retry} />
       ) : booking ? (
         <>
           <BookingDetailsCard booking={booking} employee={employee} now={now} room={room} />
+
+          {cancellationSucceeded && (
+            <div
+              aria-live="polite"
+              className="mt-6 flex items-center gap-2.5 rounded-lg border border-border bg-muted px-4 py-3 text-sm font-medium"
+              role="status"
+            >
+              <CircleCheck aria-hidden="true" className="shrink-0" size={16} />
+              Booking cancelled — the status badge above has been updated.
+            </div>
+          )}
+
           {canManageBooking ? (
             <CancelBookingPanel
               error={cancellationError}
