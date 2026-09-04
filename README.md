@@ -8,10 +8,10 @@ An internal web application for managing meeting room bookings. Built as a take-
 
 ## Features
 
-- **Dashboard** — at-a-glance metrics for today's meetings, room availability, and upcoming bookings
-- **Rooms** — browse all meeting rooms with search and filter (floor, capacity, amenity)
-- **Schedule** — day and week calendar views per room or across all rooms
-- **Bookings** — create, view, edit, cancel, search, and filter bookings
+- **Dashboard** - at-a-glance metrics for today's meetings, room availability, and upcoming bookings
+- **Rooms** - browse all meeting rooms with search and filter (floor, capacity, amenity)
+- **Schedule** - day and week calendar views per room or across all rooms
+- **Bookings** - create, view, edit, cancel, search, and filter bookings
 
 ## Tech Stack
 
@@ -46,7 +46,7 @@ npm run lint     # lint the project
 
 ### Data layer
 
-The app has no backend. Initial data is loaded from JSON files in `src/data/` (rooms, employees, and seed bookings). All data access goes through service functions in `src/services/` that expose an async, API-shaped interface — `getBookings()`, `createBooking()`, `updateBooking()`, etc. The UI only ever calls these functions, never importing the JSON directly. Replacing them with real API calls in the future requires no changes to the UI.
+The app has no backend. Initial data is loaded from JSON files in `src/data/` (rooms, employees, and seed bookings). All data access goes through service functions in `src/services/` that expose an async, API-shaped interface - `getBookings()`, `createBooking()`, `updateBooking()`, etc. The UI only ever calls these functions, never importing the JSON directly. Replacing them with real API calls in the future requires no changes to the UI.
 
 ### Persistence
 
@@ -62,8 +62,8 @@ Booking validation (required fields, time ordering, future-only start times) and
 
 ## Trade-offs and Assumptions
 
-- **No authentication** — the assignment targets internal employees, so there is no login flow. The "organizer" field on a booking acts as the booking owner.
-- **Rooms and employees are static** — only bookings are mutable. Adding or removing rooms and employees is out of scope for this assignment.
-- **Single timezone** — all times are stored as ISO 8601 strings and displayed using the browser's local timezone via `Intl.DateTimeFormat`. A multi-timezone office would need explicit timezone handling.
-- **No recurring bookings** — each booking is a one-off event.
-- **Schedule visible hours** — the calendar view shows 07:00–19:00 to cover early and standard business hours. Bookings outside this window are not displayed in the time-grid view (they remain accessible from the Bookings list and detail pages).
+- **No authentication** - the assignment targets internal employees, so there is no login flow. The "organizer" field on a booking acts as the booking owner.
+- **Rooms and employees are static** - only bookings are mutable. Adding or removing rooms and employees is out of scope for this assignment.
+- **Single timezone** - all times are stored as ISO 8601 strings and displayed using the browser's local timezone via `Intl.DateTimeFormat`. A multi-timezone office would need explicit timezone handling.
+- **No recurring bookings** - each booking is a one-off event.
+- **Schedule visible hours** - the calendar view shows 07:00–19:00 to cover early and standard business hours. Bookings outside this window are not displayed in the time-grid view (they remain accessible from the Bookings list and detail pages).
