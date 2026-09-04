@@ -1,5 +1,5 @@
 import { CalendarDays, CircleCheck, CircleX, Clock3, LoaderCircle, Save } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -30,18 +30,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
 import { fromLocalDateValue, toLocalDateValue } from '@/utils/date'
-
-export type AvailabilityStatus = 'idle' | 'checking' | 'available' | 'unavailable'
-
-export type BookingFormValues = {
-  date: string
-  description: string
-  employeeId: string
-  endTime: string
-  roomId: string
-  startTime: string
-  title: string
-}
+import type { AvailabilityStatus, BookingFormValues } from '../types/bookingForm'
 
 type BookingFormProps = {
   availabilityStatus: AvailabilityStatus
@@ -52,7 +41,7 @@ type BookingFormProps = {
   isSubmitting: boolean
   minimumDateTime: string
   onChange: (name: keyof BookingFormValues, value: string) => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void
   rooms: Room[]
   values: BookingFormValues
 }

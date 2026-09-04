@@ -11,9 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { indexById } from '@/utils/collection'
 import { timeFormatter } from '@/utils/date'
 import { formatMeetingDay } from '../utils/date'
 
@@ -30,11 +32,11 @@ export function UpcomingMeetingsCard({
   now,
   rooms,
 }: UpcomingMeetingsCardProps) {
-  const roomById = new Map(rooms.map((room) => [room.id, room]))
-  const employeeById = new Map(employees.map((employee) => [employee.id, employee]))
+  const roomById = indexById(rooms)
+  const employeeById = indexById(employees)
 
   return (
-    <Card>
+    <Card className="h-[min(44rem,calc(100dvh-13rem))] min-h-0">
       <CardHeader>
         <CardTitle>Upcoming meetings</CardTitle>
         <CardDescription>Your next confirmed room bookings.</CardDescription>
@@ -45,10 +47,11 @@ export function UpcomingMeetingsCard({
           </Link>
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-0 flex-1 p-0">
         {bookings.length > 0 ? (
-          <div className="divide-y">
-            {bookings.slice(0, 5).map((booking) => {
+          <ScrollArea aria-label="Upcoming meetings" className="h-full">
+            <div className="divide-y px-(--card-spacing) pb-1">
+            {bookings.map((booking) => {
               const start = new Date(booking.startTime)
               const end = new Date(booking.endTime)
               const room = roomById.get(booking.roomId)
@@ -79,7 +82,8 @@ export function UpcomingMeetingsCard({
                 </Link>
               )
             })}
-          </div>
+            </div>
+          </ScrollArea>
         ) : (
           <div className="py-10 text-center">
             <CalendarDays

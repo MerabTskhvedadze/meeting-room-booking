@@ -4,34 +4,173 @@
     "name": "Atlas Boardroom",
     "capacity": 16,
     "floor": 1,
-    "amenities": ["TV Screen", "Video Conferencing", "Whiteboard", "Coffee Machine"]
+    "amenities": [
+      "TV Screen",
+      "Video Conferencing",
+      "Whiteboard",
+      "Coffee Machine"
+    ]
   },
   {
     "id": "room-102",
     "name": "Apollo Huddle",
     "capacity": 4,
     "floor": 1,
-    "amenities": ["TV Screen", "Whiteboard"]
+    "amenities": [
+      "TV Screen",
+      "Whiteboard"
+    ]
   },
   {
     "id": "room-201",
     "name": "Nexus Creative Lab",
     "capacity": 8,
     "floor": 2,
-    "amenities": ["Whiteboard", "Video Conferencing"]
+    "amenities": [
+      "Whiteboard",
+      "Video Conferencing"
+    ]
   },
   {
     "id": "room-202",
     "name": "Zenith Focus Pod",
     "capacity": 2,
     "floor": 2,
-    "amenities": ["Phone Booth Acoustic"]
+    "amenities": [
+      "Phone Booth Acoustic"
+    ]
   },
   {
     "id": "room-301",
     "name": "Olympus Conference",
     "capacity": 20,
     "floor": 3,
-    "amenities": ["Projector", "Video Conferencing", "Whiteboard", "Microphone System"]
+    "amenities": [
+      "Projector",
+      "Video Conferencing",
+      "Whiteboard",
+      "Microphone System"
+    ]
+  },
+  {
+    "id": "room-103",
+    "name": "Orion Stand-up",
+    "capacity": 6,
+    "floor": 1,
+    "amenities": [
+      "TV Screen",
+      "Whiteboard"
+    ]
+  },
+  {
+    "id": "room-104",
+    "name": "Nova Interview Room",
+    "capacity": 4,
+    "floor": 1,
+    "amenities": [
+      "Video Conferencing",
+      "Acoustic Panels"
+    ]
+  },
+  {
+    "id": "room-105",
+    "name": "Mercury Phone Room",
+    "capacity": 2,
+    "floor": 1,
+    "amenities": [
+      "Phone Booth Acoustic",
+      "Monitor"
+    ]
+  },
+  {
+    "id": "room-203",
+    "name": "Aurora Workshop",
+    "capacity": 12,
+    "floor": 2,
+    "amenities": [
+      "Projector",
+      "Movable Tables",
+      "Whiteboard",
+      "Video Conferencing"
+    ]
+  },
+  {
+    "id": "room-204",
+    "name": "Luna Focus Room",
+    "capacity": 3,
+    "floor": 2,
+    "amenities": [
+      "Monitor",
+      "Acoustic Panels"
+    ]
+  },
+  {
+    "id": "room-205",
+    "name": "Comet Collaboration",
+    "capacity": 8,
+    "floor": 2,
+    "amenities": [
+      "TV Screen",
+      "Whiteboard",
+      "Video Conferencing"
+    ]
+  },
+  {
+    "id": "room-302",
+    "name": "Titan Training Room",
+    "capacity": 24,
+    "floor": 3,
+    "amenities": [
+      "Projector",
+      "Microphone System",
+      "Video Conferencing",
+      "Whiteboard"
+    ]
+  },
+  {
+    "id": "room-303",
+    "name": "Vega Strategy Room",
+    "capacity": 10,
+    "floor": 3,
+    "amenities": [
+      "TV Screen",
+      "Video Conferencing",
+      "Coffee Machine"
+    ]
+  },
+  {
+    "id": "room-304",
+    "name": "Sol Executive Room",
+    "capacity": 14,
+    "floor": 3,
+    "amenities": [
+      "Video Conferencing",
+      "TV Screen",
+      "Whiteboard",
+      "Catering Station"
+    ]
+  },
+  {
+    "id": "room-401",
+    "name": "Horizon Event Space",
+    "capacity": 40,
+    "floor": 4,
+    "amenities": [
+      "Projector",
+      "Microphone System",
+      "Video Conferencing",
+      "Catering Station"
+    ]
+  },
+  {
+    "id": "room-402",
+    "name": "Echo Podcast Studio",
+    "capacity": 5,
+    "floor": 4,
+    "amenities": [
+      "Microphone System",
+      "Acoustic Panels",
+      "Monitor"
+    ]
   }
 ]

@@ -1,17 +1,16 @@
 import { Building2, Plus } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
-import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
-import { getBookings } from '@/services/bookingService'
-import { getRooms } from '@/services/roomService'
-import type { Booking } from '@/types/booking'
-import type { Room } from '@/types/room'
+import { useDocumentTitle } from '@/hooks/use-document-title'
+import { useUrlState } from '@/hooks/use-url-state'
+import { indexById } from '@/utils/collection'
 import { toLocalDateValue } from '@/utils/date'
+import { ScheduleBookingDrawer } from '../components/ScheduleBookingDrawer'
 import { ScheduleCalendar } from '../components/ScheduleCalendar'
 import {
   ALL_ROOMS_VALUE,
@@ -19,80 +18,54 @@ import {
   type ScheduleView,
 } from '../components/ScheduleControls'
 import { ScheduleLoading } from '../components/ScheduleLoading'
+import { useScheduleData } from '../hooks/useScheduleData'
 
 const datePattern = /^\d{4}-\d{2}-\d{2}$/
 
 function isValidDateValue(value: string) {
-  if (!datePattern.test(value)) {
-    return false
-  }
-
+  if (!datePattern.test(value)) return false
   const date = new Date(`${value}T00:00:00`)
-
   return !Number.isNaN(date.getTime()) && toLocalDateValue(date) === value
 }
 
 export function SchedulePage() {
   useDocumentTitle('Schedule')
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [loadAttempt, setLoadAttempt] = useState(0)
+  const { searchParams, setSearchParams, setValue: updateSchedule } = useUrlState()
+  const { data, error, isLoading, retry } = useScheduleData()
+  const bookings = useMemo(() => data?.bookings ?? [], [data?.bookings])
+  const employees = useMemo(() => data?.employees ?? [], [data?.employees])
+  const rooms = useMemo(() => data?.rooms ?? [], [data?.rooms])
 
   useEffect(() => {
-    let shouldUpdate = true
+    if (!data) return
 
-    Promise.all([getRooms(), getBookings()])
-      .then(([loadedRooms, loadedBookings]) => {
-        if (!shouldUpdate) {
-          return
-        }
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams)
+      const requestedRoom = nextParams.get('room') ?? ''
+      const requestedView = nextParams.get('view')
+      const requestedDate = nextParams.get('date') ?? ''
+      const requestedBooking = nextParams.get('booking') ?? ''
 
-        setRooms(loadedRooms)
-        setBookings(loadedBookings)
+      if (
+        requestedRoom !== ALL_ROOMS_VALUE &&
+        !rooms.some((room) => room.id === requestedRoom)
+      ) {
+        nextParams.set('room', ALL_ROOMS_VALUE)
+      }
+      if (requestedView !== 'day' && requestedView !== 'week') {
+        nextParams.set('view', 'week')
+      }
+      if (!isValidDateValue(requestedDate)) {
+        nextParams.set('date', toLocalDateValue(new Date()))
+      }
+      if (requestedBooking && !bookings.some((booking) => booking.id === requestedBooking)) {
+        nextParams.delete('booking')
+      }
 
-        setSearchParams((currentParams) => {
-          const nextParams = new URLSearchParams(currentParams)
-          const requestedRoom = nextParams.get('room') ?? ''
-          const requestedView = nextParams.get('view')
-          const requestedDate = nextParams.get('date') ?? ''
-
-          if (
-            requestedRoom !== ALL_ROOMS_VALUE &&
-            !loadedRooms.some((room) => room.id === requestedRoom)
-          ) {
-            nextParams.set('room', ALL_ROOMS_VALUE)
-          }
-
-          if (requestedView !== 'day' && requestedView !== 'week') {
-            nextParams.set('view', 'week')
-          }
-
-          if (!isValidDateValue(requestedDate)) {
-            nextParams.set('date', toLocalDateValue(new Date()))
-          }
-
-          return nextParams
-        }, { replace: true })
-      })
-      .catch(() => {
-        if (shouldUpdate) {
-          setError('The room schedule could not be loaded. Please try again.')
-        }
-      })
-      .finally(() => {
-        if (shouldUpdate) {
-          setIsLoading(false)
-        }
-      })
-
-    return () => {
-      shouldUpdate = false
-    }
-  }, [loadAttempt, setSearchParams])
+      return nextParams
+    }, { replace: true })
+  }, [bookings, data, rooms, setSearchParams])
 
   const roomValue = searchParams.get('room') ?? ALL_ROOMS_VALUE
   const view: ScheduleView = searchParams.get('view') === 'day' ? 'day' : 'week'
@@ -100,7 +73,12 @@ export function SchedulePage() {
   const date = isValidDateValue(requestedDate)
     ? requestedDate
     : toLocalDateValue(new Date())
-  const selectedRoom = rooms.find((room) => room.id === roomValue)
+  const roomById = useMemo(() => indexById(rooms), [rooms])
+  const employeeById = useMemo(() => indexById(employees), [employees])
+  const selectedRoom = roomById.get(roomValue)
+  const selectedBooking = bookings.find(
+    (booking) => booking.id === (searchParams.get('booking') ?? ''),
+  ) ?? null
   const isAllRooms = roomValue === ALL_ROOMS_VALUE
   const visibleBookings = useMemo(
     () =>
@@ -112,16 +90,18 @@ export function SchedulePage() {
     [bookings, isAllRooms, selectedRoom?.id],
   )
 
-  function retryLoading() {
-    setIsLoading(true)
-    setError('')
-    setLoadAttempt((attempt) => attempt + 1)
-  }
 
-  function updateSchedule(name: 'date' | 'room' | 'view', value: string) {
-    const nextParams = new URLSearchParams(searchParams)
-    nextParams.set(name, value)
-    setSearchParams(nextParams, { replace: true })
+  function changeView(nextView: ScheduleView) {
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams)
+      nextParams.set('view', nextView)
+
+      if (nextView === 'day') {
+        nextParams.set('date', toLocalDateValue(new Date()))
+      }
+
+      return nextParams
+    }, { replace: true })
   }
 
   return (
@@ -130,9 +110,7 @@ export function SchedulePage() {
         actions={
           <Link
             className={buttonVariants()}
-            to={
-              selectedRoom ? `/bookings/new?room=${selectedRoom.id}` : '/bookings/new'
-            }
+            to={selectedRoom ? `/bookings/new?room=${selectedRoom.id}` : '/bookings/new'}
           >
             <Plus aria-hidden="true" />
             New booking
@@ -146,7 +124,7 @@ export function SchedulePage() {
       {isLoading ? (
         <ScheduleLoading />
       ) : error ? (
-        <LoadError className="mt-6" message={error} onRetry={retryLoading} />
+        <LoadError className="mt-6" message={error} onRetry={retry} />
       ) : rooms.length === 0 ? (
         <EmptyState
           actionLabel="View rooms"
@@ -160,7 +138,7 @@ export function SchedulePage() {
         <>
           <ScheduleControls
             onRoomChange={(value) => updateSchedule('room', value)}
-            onViewChange={(value) => updateSchedule('view', value)}
+            onViewChange={changeView}
             room={selectedRoom}
             roomValue={roomValue}
             rooms={rooms}
@@ -170,7 +148,7 @@ export function SchedulePage() {
             bookings={visibleBookings}
             date={date}
             onDateChange={(value) => updateSchedule('date', value)}
-            onOpenBooking={(bookingId) => navigate(`/bookings/${bookingId}`)}
+            onOpenBooking={(bookingId) => updateSchedule('booking', bookingId)}
             roomName={selectedRoom?.name ?? 'All meeting rooms'}
             rooms={rooms}
             showRoomNames={isAllRooms}
@@ -178,6 +156,13 @@ export function SchedulePage() {
           />
         </>
       )}
+
+      <ScheduleBookingDrawer
+        booking={selectedBooking}
+        employee={selectedBooking ? employeeById.get(selectedBooking.employeeId) : undefined}
+        onClose={() => updateSchedule('booking', '')}
+        room={selectedBooking ? roomById.get(selectedBooking.roomId) : undefined}
+      />
     </section>
   )
 }

@@ -21,7 +21,39 @@
   --fc-neutral-bg-color: var(--muted);
   --fc-page-bg-color: var(--card);
   --fc-today-bg-color: color-mix(in oklch, #4f46e5 7%, transparent);
+  color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* FullCalendar's Classic palette applies light backgrounds directly to table
+   cells, so token variables alone are not enough when the app is dark. */
+.dark .schedule-calendar .fc-theme-standard .fc-scrollgrid,
+.dark .schedule-calendar .fc-theme-standard td,
+.dark .schedule-calendar .fc-theme-standard th,
+.dark .schedule-calendar .fc-list,
+.dark .schedule-calendar .fc-list-day-cushion,
+.dark .schedule-calendar .fc-list-table td {
+  border-color: var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+.dark .schedule-calendar .fc-theme-standard .fc-col-header-cell,
+.dark .schedule-calendar .fc-theme-standard .fc-timegrid-axis,
+.dark .schedule-calendar .fc-list-day-cushion {
+  background-color: var(--muted);
+}
+
+.dark .schedule-calendar .fc-theme-standard .fc-day-today {
+  background-color: color-mix(in oklch, #4f46e5 14%, var(--card));
+}
+
+.dark .schedule-calendar .fc-list-event:hover td {
+  background-color: var(--muted);
+}
+
+.dark .schedule-calendar .fc-button:disabled {
+  opacity: 0.45;
 }
 
 .schedule-calendar .fc-toolbar-title {

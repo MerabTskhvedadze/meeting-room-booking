@@ -10,7 +10,9 @@ function resolveTheme(theme: Theme): 'light' | 'dark' {
 }
 
 function applyTheme(theme: Theme): void {
-  document.documentElement.classList.toggle('dark', resolveTheme(theme) === 'dark')
+  const resolvedTheme = resolveTheme(theme)
+  document.documentElement.classList.toggle('dark', resolvedTheme === 'dark')
+  document.documentElement.dataset.colorScheme = resolvedTheme
 }
 
 export function useTheme() {

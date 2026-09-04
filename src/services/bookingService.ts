@@ -17,7 +17,11 @@ const rooms = roomsSeed as Room[]
 const employees = employeesSeed as Employee[]
 
 function readBookings(): Booking[] {
-  return structuredClone(readStoredJson(STORAGE_KEY, seedBookings))
+  const storedBookings = readStoredJson(STORAGE_KEY, seedBookings)
+  const storedIds = new Set(storedBookings.map((booking) => booking.id))
+  const newSeedBookings = seedBookings.filter((booking) => !storedIds.has(booking.id))
+
+  return structuredClone([...storedBookings, ...newSeedBookings])
 }
 
 function saveBookings(bookings: Booking[]): void {

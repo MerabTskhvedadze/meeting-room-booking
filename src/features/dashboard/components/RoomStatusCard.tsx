@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Booking } from '@/types/booking'
 import type { Room } from '@/types/room'
 import { timeFormatter } from '@/utils/date'
@@ -30,7 +31,7 @@ export function RoomStatusCard({
   const occupiedRoomIds = new Set(activeBookings.map((booking) => booking.roomId))
 
   return (
-    <Card>
+    <Card className="h-[min(44rem,calc(100dvh-13rem))] min-h-0">
       <CardHeader>
         <CardTitle>Room status</CardTitle>
         <CardDescription>Current availability and the next meeting.</CardDescription>
@@ -40,8 +41,10 @@ export function RoomStatusCard({
           </Badge>
         </CardAction>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {rooms.map((room) => {
+      <CardContent className="min-h-0 flex-1 p-0">
+        <ScrollArea aria-label="Room availability" className="h-full">
+          <div className="space-y-4 px-(--card-spacing) pb-1">
+          {rooms.map((room) => {
           const activeBooking = activeBookings.find((booking) => booking.roomId === room.id)
           const nextBooking = upcomingBookings.find((booking) => booking.roomId === room.id)
 
@@ -69,7 +72,9 @@ export function RoomStatusCard({
               </Badge>
             </div>
           )
-        })}
+          })}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   )

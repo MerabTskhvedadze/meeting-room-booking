@@ -4,7 +4,7 @@ An internal web application for managing meeting room bookings. Built as a take-
 
 ## Live Demo
 
-Deployed on Vercel — add your deployment URL here.
+[View the deployed application](https://meeting-room-booking-ebon.vercel.app/)
 
 ## Features
 

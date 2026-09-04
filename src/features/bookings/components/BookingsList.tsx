@@ -1,6 +1,7 @@
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { indexById } from '@/utils/collection'
 import { BookingCard } from './BookingCard'
 
 interface BookingsListProps {
@@ -11,8 +12,8 @@ interface BookingsListProps {
 }
 
 export function BookingsList({ bookings, employees, now, rooms }: BookingsListProps) {
-  const roomById = new Map(rooms.map((room) => [room.id, room]))
-  const employeeById = new Map(employees.map((employee) => [employee.id, employee]))
+  const roomById = indexById(rooms)
+  const employeeById = indexById(employees)
 
   return (
     <ul className="mt-6 list-none space-y-3">
