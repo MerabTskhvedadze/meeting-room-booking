@@ -1,8 +1,9 @@
-import { ArrowLeft, CalendarX2, Pencil } from 'lucide-react'
+import { ArrowLeft, CalendarX2, CircleCheck, Pencil } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
@@ -29,6 +30,9 @@ export function BookingDetailsPage() {
   const [isConfirmingCancellation, setIsConfirmingCancellation] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [cancellationError, setCancellationError] = useState('')
+  const [cancellationSucceeded, setCancellationSucceeded] = useState(false)
+
+  useDocumentTitle(booking?.title ?? 'Booking details')
 
   useEffect(() => {
     let shouldUpdate = true
@@ -83,6 +87,7 @@ export function BookingDetailsPage() {
       const cancelledBooking = await cancelBooking(booking.id)
       setBooking(cancelledBooking)
       setIsConfirmingCancellation(false)
+      setCancellationSucceeded(true)
     } catch (cancellationFailure) {
       setCancellationError(
         cancellationFailure instanceof Error
@@ -123,6 +128,18 @@ export function BookingDetailsPage() {
       ) : booking ? (
         <>
           <BookingDetailsCard booking={booking} employee={employee} now={now} room={room} />
+
+          {cancellationSucceeded && (
+            <div
+              aria-live="polite"
+              className="mt-6 flex items-center gap-2.5 rounded-lg border border-border bg-muted px-4 py-3 text-sm font-medium"
+              role="status"
+            >
+              <CircleCheck aria-hidden="true" className="shrink-0" size={16} />
+              Booking cancelled — the status badge above has been updated.
+            </div>
+          )}
+
           {canManageBooking ? (
             <CancelBookingPanel
               error={cancellationError}

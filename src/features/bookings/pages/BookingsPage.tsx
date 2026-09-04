@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +20,7 @@ import { BookingsLoading } from '../components/BookingsLoading'
 import { BookingsList } from '../components/BookingsList'
 
 export function BookingsPage() {
+  useDocumentTitle('Bookings')
   const [bookings, setBookings] = useState<Booking[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])

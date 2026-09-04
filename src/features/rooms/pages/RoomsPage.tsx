@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +14,7 @@ import { RoomFilters } from '../components/RoomFilters'
 import { RoomsLoading } from '../components/RoomsLoading'
 
 export function RoomsPage() {
+  useDocumentTitle('Rooms')
   const [rooms, setRooms] = useState<Room[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')

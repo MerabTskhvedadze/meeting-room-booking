@@ -15,16 +15,17 @@ export function BookingsList({ bookings, employees, now, rooms }: BookingsListPr
   const employeeById = new Map(employees.map((employee) => [employee.id, employee]))
 
   return (
-    <div className="mt-6 space-y-3">
+    <ul className="mt-6 list-none space-y-3">
       {bookings.map((booking) => (
-        <BookingCard
-          booking={booking}
-          employee={employeeById.get(booking.employeeId)}
-          key={booking.id}
-          now={now}
-          room={roomById.get(booking.roomId)}
-        />
+        <li key={booking.id}>
+          <BookingCard
+            booking={booking}
+            employee={employeeById.get(booking.employeeId)}
+            now={now}
+            room={roomById.get(booking.roomId)}
+          />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

@@ -3,10 +3,14 @@ import {
   CalendarDays,
   CalendarRange,
   LayoutDashboard,
+  Monitor,
+  Moon,
   Plus,
+  Sun,
 } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Sidebar,
@@ -23,7 +27,8 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useTheme, type Theme } from '@/hooks/use-theme'
 
 const navigation = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true },
@@ -96,6 +101,44 @@ function AppSidebar() {
   )
 }
 
+const NEXT_THEME: Record<Theme, Theme> = {
+  light: 'dark',
+  dark: 'system',
+  system: 'light',
+}
+
+const THEME_LABEL: Record<Theme, string> = {
+  light: 'Switch to dark mode',
+  dark: 'Switch to system theme',
+  system: 'Switch to light mode',
+}
+
+const THEME_ICON: Record<Theme, typeof Sun> = {
+  light: Sun,
+  dark: Moon,
+  system: Monitor,
+}
+
+function ThemeToggle() {
+  const { setTheme, theme } = useTheme()
+  const Icon = THEME_ICON[theme]
+  const label = THEME_LABEL[theme]
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        aria-label={label}
+        className={buttonVariants({ size: 'icon', variant: 'ghost' })}
+        onClick={() => setTheme(NEXT_THEME[theme])}
+        type="button"
+      >
+        <Icon aria-hidden="true" size={18} />
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
 function ShellContent() {
   const { pathname } = useLocation()
   const currentPage =
@@ -113,6 +156,8 @@ function ShellContent() {
               <p className="truncate text-sm font-medium">{currentPage}</p>
             </div>
 
+            <ThemeToggle />
+
             <Link className={buttonVariants()} to="/bookings/new">
               <Plus aria-hidden="true" />
               <span className="hidden sm:inline">New booking</span>
@@ -122,7 +167,9 @@ function ShellContent() {
         </header>
 
         <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </SidebarInset>
     </>

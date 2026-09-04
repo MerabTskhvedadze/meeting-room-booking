@@ -11,6 +11,7 @@ import { getRooms } from '@/services/roomService'
 import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { isBookingActive, isBookingUpcoming } from '@/utils/booking'
 import { fullDateFormatter, isSameLocalDay } from '@/utils/date'
 import { DashboardLoading } from '../components/DashboardLoading'
@@ -20,6 +21,7 @@ import { UpcomingMeetingsCard } from '../components/UpcomingMeetingsCard'
 import { getGreeting } from '../utils/date'
 
 export function DashboardPage() {
+  useDocumentTitle('Dashboard')
   const [bookings, setBookings] = useState<Booking[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])

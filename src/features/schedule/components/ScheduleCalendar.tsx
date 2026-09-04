@@ -119,7 +119,7 @@ export function ScheduleCalendar({
         slotHeaderFormat={{ hour: 'numeric', minute: '2-digit' }}
         slotHeaderInterval="01:00:00"
         slotMaxTime="19:00:00"
-        slotMinTime="08:00:00"
+        slotMinTime="07:00:00"
         toolbarTitleClass="schedule-toolbar-title"
         views={{
           list: {

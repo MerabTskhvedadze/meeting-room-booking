@@ -1,4 +1,4 @@
-import { ArrowRight, Building2, MapPin, Users } from 'lucide-react'
+import { ArrowRight, Building2, CalendarPlus, MapPin, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +21,7 @@ export function RoomCard({ room }: RoomCardProps) {
   return (
     <Card
       aria-labelledby={`room-${room.id}-title`}
-      className="group h-full transition hover:-translate-y-0.5 hover:ring-primary/20 hover:shadow-md"
+      className="group h-full transition-[transform,box-shadow] hover:-translate-y-0.5 hover:ring-primary/20 hover:shadow-md"
       role="article"
     >
       <CardHeader>
@@ -57,9 +57,17 @@ export function RoomCard({ room }: RoomCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="justify-end">
+      <CardFooter className="justify-between">
         <Link
-          className={buttonVariants({ variant: 'ghost' })}
+          aria-label={`Book ${room.name}`}
+          className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          to={`/bookings/new?room=${room.id}`}
+        >
+          <CalendarPlus aria-hidden="true" />
+          Book room
+        </Link>
+        <Link
+          className={buttonVariants({ variant: 'ghost', size: 'sm' })}
           to={`/schedule?room=${room.id}`}
         >
           Check schedule

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
@@ -32,6 +33,7 @@ function isValidDateValue(value: string) {
 }
 
 export function SchedulePage() {
+  useDocumentTitle('Schedule')
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [rooms, setRooms] = useState<Room[]>([])

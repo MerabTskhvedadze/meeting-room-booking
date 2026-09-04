@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, LoaderCircle, Save } from 'lucide-react'
+import { CalendarDays, CircleCheck, CircleX, Clock3, LoaderCircle, Save } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -31,6 +31,8 @@ import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
 import { fromLocalDateValue, toLocalDateValue } from '@/utils/date'
 
+export type AvailabilityStatus = 'idle' | 'checking' | 'available' | 'unavailable'
+
 export type BookingFormValues = {
   date: string
   description: string
@@ -42,6 +44,7 @@ export type BookingFormValues = {
 }
 
 type BookingFormProps = {
+  availabilityStatus: AvailabilityStatus
   cancelPath: string
   employees: Employee[]
   error: string
@@ -66,6 +69,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 })
 
 export function BookingForm({
+  availabilityStatus,
   cancelPath,
   employees,
   error,
@@ -273,6 +277,49 @@ export function BookingForm({
               </div>
             </div>
           </fieldset>
+
+          {availabilityStatus !== 'idle' && (
+            <p
+              aria-live="polite"
+              className="flex items-center gap-2 text-sm font-medium sm:col-span-2"
+              role="status"
+            >
+              {availabilityStatus === 'checking' && (
+                <>
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="animate-spin text-muted-foreground"
+                    size={15}
+                  />
+                  <span className="text-muted-foreground">Checking availability…</span>
+                </>
+              )}
+              {availabilityStatus === 'available' && (
+                <>
+                  <CircleCheck
+                    aria-hidden="true"
+                    className="shrink-0 text-emerald-600 dark:text-emerald-400"
+                    size={15}
+                  />
+                  <span className="text-emerald-700 dark:text-emerald-400">
+                    Room is available for this time slot
+                  </span>
+                </>
+              )}
+              {availabilityStatus === 'unavailable' && (
+                <>
+                  <CircleX
+                    aria-hidden="true"
+                    className="shrink-0 text-destructive"
+                    size={15}
+                  />
+                  <span className="text-destructive">
+                    Room is already booked during this time — choose a different slot or room
+                  </span>
+                </>
+              )}
+            </p>
+          )}
         </CardContent>
 
         <CardFooter className="justify-end gap-2">

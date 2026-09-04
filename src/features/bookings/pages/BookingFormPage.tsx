@@ -3,12 +3,14 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/EmptyState'
+import { useDocumentTitle } from '@/hooks/use-document-title'
 import { LoadError } from '@/components/LoadError'
 import { PageHeader } from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/button'
 import {
   createBooking,
   getBookingById,
+  isRoomAvailable,
   updateBooking,
 } from '@/services/bookingService'
 import { getEmployees } from '@/services/employeeService'
@@ -20,6 +22,7 @@ import { isBookingUpcoming } from '@/utils/booking'
 import { combineLocalDateAndTime, toDateTimeLocalValue } from '@/utils/date'
 import {
   BookingForm,
+  type AvailabilityStatus,
   type BookingFormValues,
 } from '../components/BookingForm'
 import { BookingFormLoading } from '../components/BookingFormLoading'
@@ -49,6 +52,9 @@ export function BookingFormPage() {
   const [loadAttempt, setLoadAttempt] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [availabilityStatus, setAvailabilityStatus] = useState<AvailabilityStatus>('idle')
+
+  useDocumentTitle(isEditing ? 'Edit booking' : 'New booking')
 
   useEffect(() => {
     let shouldUpdate = true
@@ -104,6 +110,42 @@ export function BookingFormPage() {
     }
   }, [bookingId, isEditing, loadAttempt, requestedRoomId])
 
+  // Check room availability whenever room, date, or time changes.
+  useEffect(() => {
+    const { roomId, date, startTime, endTime } = values
+
+    if (!roomId || !date || !startTime || !endTime) {
+      setAvailabilityStatus('idle')
+      return
+    }
+
+    const start = Date.parse(combineLocalDateAndTime(date, startTime))
+    const end = Date.parse(combineLocalDateAndTime(date, endTime))
+
+    if (isNaN(start) || isNaN(end) || start >= end) {
+      setAvailabilityStatus('idle')
+      return
+    }
+
+    setAvailabilityStatus('checking')
+
+    const timeout = setTimeout(async () => {
+      try {
+        const available = await isRoomAvailable(
+          roomId,
+          new Date(start).toISOString(),
+          new Date(end).toISOString(),
+          isEditing ? bookingId : undefined,
+        )
+        setAvailabilityStatus(available ? 'available' : 'unavailable')
+      } catch {
+        setAvailabilityStatus('idle')
+      }
+    }, 400)
+
+    return () => clearTimeout(timeout)
+  }, [values, values.roomId, values.date, values.startTime, values.endTime, isEditing, bookingId])
+
   const now = new Date()
   const canEditBooking =
     booking?.status === 'confirmed' && isBookingUpcoming(booking, now)
@@ -116,7 +158,28 @@ export function BookingFormPage() {
   }
 
   function updateValue(name: keyof BookingFormValues, value: string) {
-    setValues((currentValues) => ({ ...currentValues, [name]: value }))
+    setValues((currentValues) => {
+      const next = { ...currentValues, [name]: value }
+
+      // When the start time changes, auto-advance the end time if it would
+      // become invalid (end <= start), keeping at least a 1-hour gap.
+      if (name === 'startTime' && value && next.endTime) {
+        const toMinutes = (t: string) => {
+          const [h, m] = t.split(':').map(Number)
+          return h * 60 + m
+        }
+        const startMin = toMinutes(value)
+        const endMin = toMinutes(next.endTime)
+        if (endMin <= startMin) {
+          const newEndMin = Math.min(startMin + 60, 23 * 60 + 45)
+          const h = Math.floor(newEndMin / 60)
+          const m = newEndMin % 60
+          next.endTime = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+        }
+      }
+
+      return next
+    })
     setSubmitError('')
   }
 
@@ -214,6 +277,7 @@ export function BookingFormPage() {
         />
       ) : (
         <BookingForm
+          availabilityStatus={availabilityStatus}
           cancelPath={cancelPath}
           employees={employees}
           error={submitError}
