@@ -187,124 +187,92 @@ export function BookingForm({
             </Select>
           </div>
 
-          {isEditing ? (
-            <>
-              <label className="space-y-2" htmlFor="booking-start-time">
-                <span className={fieldLabelClassName}>Starts</span>
-                <Input
-                  autoComplete="off"
-                  id="booking-start-time"
-                  min={minimumDateTime}
-                  name="startTime"
-                  onChange={(event) => onChange('startTime', event.target.value)}
-                  required
-                  type="datetime-local"
-                  value={values.startTime}
-                />
-              </label>
+          <fieldset className="space-y-4 rounded-xl border bg-muted/20 p-4 sm:col-span-2">
+            <legend className="px-1 text-sm font-semibold">Date &amp; time</legend>
+            <p className="text-sm text-muted-foreground">
+              Select one date, then choose when the meeting starts and ends.
+            </p>
 
-              <label className="space-y-2" htmlFor="booking-end-time">
-                <span className={fieldLabelClassName}>Ends</span>
-                <Input
-                  autoComplete="off"
-                  id="booking-end-time"
-                  min={values.startTime || minimumDateTime}
-                  name="endTime"
-                  onChange={(event) => onChange('endTime', event.target.value)}
-                  required
-                  type="datetime-local"
-                  value={values.endTime}
-                />
-              </label>
-            </>
-          ) : (
-            <fieldset className="space-y-4 rounded-xl border bg-muted/20 p-4 sm:col-span-2">
-              <legend className="px-1 text-sm font-semibold">Date &amp; time</legend>
-              <p className="text-sm text-muted-foreground">
-                Select one date, then choose when the meeting starts and ends.
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-                  <Label htmlFor="booking-date">Meeting date</Label>
-                  <Popover
-                    onOpenChange={setIsDatePickerOpen}
-                    open={isDatePickerOpen}
-                  >
-                    <PopoverTrigger
-                      render={
-                        <Button
-                          aria-required="true"
-                          className="w-full justify-start px-2.5 font-normal"
-                          id="booking-date"
-                          variant="outline"
-                        />
-                      }
-                    >
-                      <CalendarDays aria-hidden="true" />
-                      {values.date
-                        ? dateFormatter.format(fromLocalDateValue(values.date))
-                        : 'Choose a date'}
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-auto p-0">
-                      <Calendar
-                        disabled={{ before: fromLocalDateValue(minimumDateTime.slice(0, 10))! }}
-                        mode="single"
-                        onSelect={(date) => {
-                          onChange('date', date ? toLocalDateValue(date) : '')
-                          setIsDatePickerOpen(false)
-                        }}
-                        selected={fromLocalDateValue(values.date)}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                <Label htmlFor="booking-date">Meeting date</Label>
+                <Popover
+                  onOpenChange={setIsDatePickerOpen}
+                  open={isDatePickerOpen}
+                >
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        aria-required="true"
+                        className="w-full justify-start px-2.5 font-normal"
+                        id="booking-date"
+                        variant="outline"
                       />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                    }
+                  >
+                    <CalendarDays aria-hidden="true" />
+                    {values.date
+                      ? dateFormatter.format(fromLocalDateValue(values.date))
+                      : 'Choose a date'}
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-auto p-0">
+                    <Calendar
+                      disabled={{ before: fromLocalDateValue(minimumDateTime.slice(0, 10))! }}
+                      mode="single"
+                      onSelect={(date) => {
+                        onChange('date', date ? toLocalDateValue(date) : '')
+                        setIsDatePickerOpen(false)
+                      }}
+                      selected={fromLocalDateValue(values.date)}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="booking-start-time">Start time</Label>
-                  <div className="relative">
-                    <Clock3
-                      aria-hidden="true"
-                      className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <Input
-                      autoComplete="off"
-                      className="pl-8 tabular-nums"
-                      id="booking-start-time"
-                      name="startTime"
-                      onChange={(event) => onChange('startTime', event.target.value)}
-                      required
-                      step={900}
-                      type="time"
-                      value={values.startTime}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="booking-end-time">End time</Label>
-                  <div className="relative">
-                    <Clock3
-                      aria-hidden="true"
-                      className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <Input
-                      autoComplete="off"
-                      className="pl-8 tabular-nums"
-                      id="booking-end-time"
-                      min={values.startTime}
-                      name="endTime"
-                      onChange={(event) => onChange('endTime', event.target.value)}
-                      required
-                      step={900}
-                      type="time"
-                      value={values.endTime}
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="booking-start-time">Start time</Label>
+                <div className="relative">
+                  <Clock3
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
+                    autoComplete="off"
+                    className="pl-8 tabular-nums"
+                    id="booking-start-time"
+                    name="startTime"
+                    onChange={(event) => onChange('startTime', event.target.value)}
+                    required
+                    step={900}
+                    type="time"
+                    value={values.startTime}
+                  />
                 </div>
               </div>
-            </fieldset>
-          )}
+
+              <div className="space-y-2">
+                <Label htmlFor="booking-end-time">End time</Label>
+                <div className="relative">
+                  <Clock3
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
+                    autoComplete="off"
+                    className="pl-8 tabular-nums"
+                    id="booking-end-time"
+                    min={values.startTime}
+                    name="endTime"
+                    onChange={(event) => onChange('endTime', event.target.value)}
+                    required
+                    step={900}
+                    type="time"
+                    value={values.endTime}
+                  />
+                </div>
+              </div>
+            </div>
+          </fieldset>
         </CardContent>
 
         <CardFooter className="justify-end gap-2">

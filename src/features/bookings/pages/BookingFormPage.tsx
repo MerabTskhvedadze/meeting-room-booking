@@ -67,13 +67,16 @@ export function BookingFormPage() {
         setEmployees(loadedEmployees)
 
         if (loadedBooking) {
+          const startDateTime = toDateTimeLocalValue(loadedBooking.startTime)
+          const endDateTime = toDateTimeLocalValue(loadedBooking.endTime)
+
           setValues({
-            date: '',
+            date: startDateTime.slice(0, 10),
             description: loadedBooking.description,
             employeeId: loadedBooking.employeeId,
-            endTime: toDateTimeLocalValue(loadedBooking.endTime),
+            endTime: endDateTime.slice(11, 16),
             roomId: loadedBooking.roomId,
-            startTime: toDateTimeLocalValue(loadedBooking.startTime),
+            startTime: startDateTime.slice(11, 16),
             title: loadedBooking.title,
           })
         } else if (!isEditing) {
@@ -125,17 +128,13 @@ export function BookingFormPage() {
       return
     }
 
-    if (!isEditing && !values.date) {
+    if (!values.date) {
       setSubmitError('Choose a meeting date.')
       return
     }
 
-    const startValue = isEditing
-      ? values.startTime
-      : combineLocalDateAndTime(values.date, values.startTime)
-    const endValue = isEditing
-      ? values.endTime
-      : combineLocalDateAndTime(values.date, values.endTime)
+    const startValue = combineLocalDateAndTime(values.date, values.startTime)
+    const endValue = combineLocalDateAndTime(values.date, values.endTime)
     const start = Date.parse(startValue)
     const end = Date.parse(endValue)
 
