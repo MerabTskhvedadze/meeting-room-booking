@@ -224,14 +224,14 @@ export function BookingForm({
 
               <div className="space-y-2">
                 <Label htmlFor="booking-start-time">Start time</Label>
-                <div className="relative">
+                <div className="flex h-8 w-full min-w-0 items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30">
                   <Clock3
                     aria-hidden="true"
-                    className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none size-4 shrink-0 text-muted-foreground"
                   />
                   <Input
                     autoComplete="off"
-                    className="pl-8 tabular-nums"
+                    className="h-auto w-auto flex-1 rounded-none border-0 bg-transparent p-0 text-base tabular-nums shadow-none focus-visible:ring-0 focus-visible:outline-none md:text-sm dark:bg-transparent"
                     id="booking-start-time"
                     name="startTime"
                     onChange={(event) => onChange('startTime', event.target.value)}
@@ -245,14 +245,14 @@ export function BookingForm({
 
               <div className="space-y-2">
                 <Label htmlFor="booking-end-time">End time</Label>
-                <div className="relative">
+                <div className="flex h-8 w-full min-w-0 items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30">
                   <Clock3
                     aria-hidden="true"
-                    className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    className="pointer-events-none size-4 shrink-0 text-muted-foreground"
                   />
                   <Input
                     autoComplete="off"
-                    className="pl-8 tabular-nums"
+                    className="h-auto w-auto flex-1 rounded-none border-0 bg-transparent p-0 text-base tabular-nums shadow-none focus-visible:ring-0 focus-visible:outline-none md:text-sm dark:bg-transparent"
                     id="booking-end-time"
                     min={values.startTime}
                     name="endTime"
