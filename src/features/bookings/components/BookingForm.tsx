@@ -1,8 +1,9 @@
-import { LoaderCircle, Save } from 'lucide-react'
-import type { FormEvent } from 'react'
+import { CalendarDays, Clock3, LoaderCircle, Save } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
 import { Button, buttonVariants } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Card,
   CardContent,
@@ -12,6 +13,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -22,8 +29,10 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
+import { fromLocalDateValue, toLocalDateValue } from '@/utils/date'
 
 export type BookingFormValues = {
+  date: string
   description: string
   employeeId: string
   endTime: string
@@ -49,6 +58,13 @@ const NO_SELECTION = 'no-selection'
 
 const fieldLabelClassName = 'text-sm font-medium'
 
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  day: 'numeric',
+  month: 'long',
+  weekday: 'short',
+  year: 'numeric',
+})
+
 export function BookingForm({
   cancelPath,
   employees,
@@ -61,13 +77,15 @@ export function BookingForm({
   rooms,
   values,
 }: BookingFormProps) {
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+
   return (
     <form onSubmit={onSubmit}>
       <Card className="mt-8">
         <CardHeader className="border-b">
           <CardTitle>Meeting details</CardTitle>
           <CardDescription>
-            Choose the room, organizer, and time for this meeting.
+            Choose the room, organizer, date, and time for this meeting.
           </CardDescription>
         </CardHeader>
 
@@ -84,11 +102,12 @@ export function BookingForm({
           <label className="space-y-2 sm:col-span-2" htmlFor="booking-title">
             <span className={fieldLabelClassName}>Title</span>
             <Input
-              autoFocus
+              autoComplete="off"
               id="booking-title"
               maxLength={100}
+              name="title"
               onChange={(event) => onChange('title', event.target.value)}
-              placeholder="For example: Product planning"
+              placeholder="For example: Product planning…"
               required
               value={values.title}
             />
@@ -97,10 +116,12 @@ export function BookingForm({
           <label className="space-y-2 sm:col-span-2" htmlFor="booking-description">
             <span className={fieldLabelClassName}>Description</span>
             <Textarea
+              autoComplete="off"
               id="booking-description"
               maxLength={500}
+              name="description"
               onChange={(event) => onChange('description', event.target.value)}
-              placeholder="Add an agenda or context for attendees"
+              placeholder="Add an agenda or context for attendees…"
               value={values.description}
             />
           </label>
@@ -166,29 +187,124 @@ export function BookingForm({
             </Select>
           </div>
 
-          <label className="space-y-2" htmlFor="booking-start-time">
-            <span className={fieldLabelClassName}>Starts</span>
-            <Input
-              id="booking-start-time"
-              min={minimumDateTime}
-              onChange={(event) => onChange('startTime', event.target.value)}
-              required
-              type="datetime-local"
-              value={values.startTime}
-            />
-          </label>
+          {isEditing ? (
+            <>
+              <label className="space-y-2" htmlFor="booking-start-time">
+                <span className={fieldLabelClassName}>Starts</span>
+                <Input
+                  autoComplete="off"
+                  id="booking-start-time"
+                  min={minimumDateTime}
+                  name="startTime"
+                  onChange={(event) => onChange('startTime', event.target.value)}
+                  required
+                  type="datetime-local"
+                  value={values.startTime}
+                />
+              </label>
 
-          <label className="space-y-2" htmlFor="booking-end-time">
-            <span className={fieldLabelClassName}>Ends</span>
-            <Input
-              id="booking-end-time"
-              min={values.startTime || minimumDateTime}
-              onChange={(event) => onChange('endTime', event.target.value)}
-              required
-              type="datetime-local"
-              value={values.endTime}
-            />
-          </label>
+              <label className="space-y-2" htmlFor="booking-end-time">
+                <span className={fieldLabelClassName}>Ends</span>
+                <Input
+                  autoComplete="off"
+                  id="booking-end-time"
+                  min={values.startTime || minimumDateTime}
+                  name="endTime"
+                  onChange={(event) => onChange('endTime', event.target.value)}
+                  required
+                  type="datetime-local"
+                  value={values.endTime}
+                />
+              </label>
+            </>
+          ) : (
+            <fieldset className="space-y-4 rounded-xl border bg-muted/20 p-4 sm:col-span-2">
+              <legend className="px-1 text-sm font-semibold">Date &amp; time</legend>
+              <p className="text-sm text-muted-foreground">
+                Select one date, then choose when the meeting starts and ends.
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                  <Label htmlFor="booking-date">Meeting date</Label>
+                  <Popover
+                    onOpenChange={setIsDatePickerOpen}
+                    open={isDatePickerOpen}
+                  >
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          aria-required="true"
+                          className="w-full justify-start px-2.5 font-normal"
+                          id="booking-date"
+                          variant="outline"
+                        />
+                      }
+                    >
+                      <CalendarDays aria-hidden="true" />
+                      {values.date
+                        ? dateFormatter.format(fromLocalDateValue(values.date))
+                        : 'Choose a date'}
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-auto p-0">
+                      <Calendar
+                        disabled={{ before: fromLocalDateValue(minimumDateTime.slice(0, 10))! }}
+                        mode="single"
+                        onSelect={(date) => {
+                          onChange('date', date ? toLocalDateValue(date) : '')
+                          setIsDatePickerOpen(false)
+                        }}
+                        selected={fromLocalDateValue(values.date)}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="booking-start-time">Start time</Label>
+                  <div className="relative">
+                    <Clock3
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <Input
+                      autoComplete="off"
+                      className="pl-8 tabular-nums"
+                      id="booking-start-time"
+                      name="startTime"
+                      onChange={(event) => onChange('startTime', event.target.value)}
+                      required
+                      step={900}
+                      type="time"
+                      value={values.startTime}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="booking-end-time">End time</Label>
+                  <div className="relative">
+                    <Clock3
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <Input
+                      autoComplete="off"
+                      className="pl-8 tabular-nums"
+                      id="booking-end-time"
+                      min={values.startTime}
+                      name="endTime"
+                      onChange={(event) => onChange('endTime', event.target.value)}
+                      required
+                      step={900}
+                      type="time"
+                      value={values.endTime}
+                    />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          )}
         </CardContent>
 
         <CardFooter className="justify-end gap-2">

@@ -17,7 +17,7 @@ import type { Booking } from '@/types/booking'
 import type { Employee } from '@/types/employee'
 import type { Room } from '@/types/room'
 import { isBookingUpcoming } from '@/utils/booking'
-import { toDateTimeLocalValue } from '@/utils/date'
+import { combineLocalDateAndTime, toDateTimeLocalValue } from '@/utils/date'
 import {
   BookingForm,
   type BookingFormValues,
@@ -25,11 +25,12 @@ import {
 import { BookingFormLoading } from '../components/BookingFormLoading'
 
 const emptyFormValues: BookingFormValues = {
+  date: '',
   description: '',
   employeeId: '',
-  endTime: '',
+  endTime: '10:00',
   roomId: '',
-  startTime: '',
+  startTime: '09:00',
   title: '',
 }
 
@@ -67,6 +68,7 @@ export function BookingFormPage() {
 
         if (loadedBooking) {
           setValues({
+            date: '',
             description: loadedBooking.description,
             employeeId: loadedBooking.employeeId,
             endTime: toDateTimeLocalValue(loadedBooking.endTime),
@@ -123,8 +125,19 @@ export function BookingFormPage() {
       return
     }
 
-    const start = Date.parse(values.startTime)
-    const end = Date.parse(values.endTime)
+    if (!isEditing && !values.date) {
+      setSubmitError('Choose a meeting date.')
+      return
+    }
+
+    const startValue = isEditing
+      ? values.startTime
+      : combineLocalDateAndTime(values.date, values.startTime)
+    const endValue = isEditing
+      ? values.endTime
+      : combineLocalDateAndTime(values.date, values.endTime)
+    const start = Date.parse(startValue)
+    const end = Date.parse(endValue)
 
     if (Number.isNaN(start) || Number.isNaN(end)) {
       setSubmitError('Choose valid start and end times.')

@@ -38,3 +38,16 @@ export function toLocalDateValue(date: Date) {
 
   return `${year}-${month}-${day}`
 }
+
+export function fromLocalDateValue(value: string) {
+  if (!value) {
+    return undefined
+  }
+
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+export function combineLocalDateAndTime(date: string, time: string) {
+  return `${date}T${time}`
+}
